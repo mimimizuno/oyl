@@ -29,6 +29,9 @@ private:
         outputs;
     // トリガを表すベクトル（どのgridか、時刻、位置、値)
     std::vector<std::tuple<Grid2D<Element>*,double, int, int, double>> voltageTriggers; // (grid, time, x, y, V)
+    // ファイル出力する素子をファイル名とともに格納するベクトル
+    std::vector<std::pair<std::ofstream*, std::shared_ptr<Element>>> selectedElements;
+
 
 public:
     // コンストラクタ(刻み時間,シミュレーションの終了タイミング)
@@ -73,6 +76,12 @@ public:
     // トリガを適用させる
     void applyVoltageTriggers();
 
+    // ファイル出力する素子とファイルを格納するベクトルに追加する
+    void addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element);
+
+    // selectedElementsから該当する素子のVnを記録するファイル出力
+    void outputSelectedElements();
+
 };
 
 // コンストラクタ
@@ -110,7 +119,7 @@ void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
     auto ptr = tunnelgrid.getTunnelPlace();
     //----------------トンネル場所の記録--------------------------------
     auto [y, x] = tunnelgrid.getPositionOf(ptr);
-    std::ofstream log("output/tunnel_log.txt", std::ios::app);
+    std::ofstream log("../output/tunnel_log.txt", std::ios::app);
     if (log.is_open()) {
         log << "t=" << t
             << ", x=" << x
@@ -146,12 +155,31 @@ void Simulation2D<Element>::closeFiles() const
 // 出力処理（未実装部分を仮追加）
 template <typename Element>
 void Simulation2D<Element>::outputToFile()
-{
+{    
     // if (accumulatedTime >= outputInterval)
     // {
     //     accumulatedTime -= outputInterval;
     //     // TODO: 各 printdatavector に対してデータを渡す処理を入れる
     // }
+}
+
+template <typename Element>
+void Simulation2D<Element>::addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element)
+{
+    selectedElements.emplace_back(&ofs, element);
+}
+
+template <typename Element>
+void Simulation2D<Element>::outputSelectedElements()
+{
+    for (auto& [ofsPtr, elemPtr] : selectedElements)
+    {
+        // pair型で格納したファイルと素子の情報からファイルに出力する
+        if (!ofsPtr || !(*ofsPtr) || !elemPtr)
+            // 情報がない場合はcontinue
+            continue;
+        (*ofsPtr) << t << " " << elemPtr->getVn() << endl;
+    }
 }
 
 // oyl-video形式に合わせた出力を生成
@@ -177,7 +205,7 @@ void Simulation2D<Element>::outputTooyl()
             }
             else
             {
-                label = "output" + std::to_string(outputIndex);
+                label = "../output" + std::to_string(outputIndex);
                 ++outputIndex;
             }
 
@@ -217,6 +245,8 @@ void Simulation2D<Element>::runStep()
 
     // oyl-video形式に出力
     outputTooyl();
+    // ファイル出力
+    outputSelectedElements();
 
     // grid全体のVn計算(5回計算してならす)
     for (int i = 0; i < 5; i++)
@@ -236,6 +266,7 @@ void Simulation2D<Element>::runStep()
     for (auto &grid : grids)
     {
         grid.updateGriddE();
+        if(t > 100 && t < 101) cout << "t = "<< t << " ： " << grid.getElement(15,15)->getdE()["up"] << endl;
     }
 
     // wtの計算と比較
@@ -299,7 +330,7 @@ template <typename Element>
 void Simulation2D<Element>::applyVoltageTriggers()
 {
     for (const auto& [gridPtr, triggerTime, x, y, voltage] : voltageTriggers) {
-        if (t >= triggerTime && t < triggerTime + dt) {
+        if (t >= triggerTime && t < triggerTime + dt * 10) {
             if (!gridPtr) {
                 throw std::invalid_argument("Trigger references a null grid pointer.");
             }
