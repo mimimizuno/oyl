@@ -41,7 +41,7 @@ int main()
     Sim sim(dt, endtime);
     sim.addGrid({grid});
     // 時刻150ns〜150.1nsの間、(1,1)の素子に0.006Vを加える
-    sim.addVoltageTrigger(150, &grid, 1, 1, 0.06);
+    sim.addVoltageTrigger(160, &grid, 15, 15, 0.06);
     sim.run();
 
 

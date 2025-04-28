@@ -2,6 +2,9 @@
 
 # ビルドフォルダに移動
 cd "$(dirname "$0")/build"
+rm output/seo.mp4
+rm output/tunnel_log.txt
+
 # 出力ディレクトリ作成
 mkdir -p output
 

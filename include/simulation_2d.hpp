@@ -38,7 +38,7 @@ public:
     std::pair<bool, std::shared_ptr<Grid2D<Element>>> comparewt();
 
     // トンネルの処理
-    void handleTunnels(Grid2D<Element> &tunnelelement);
+    void handleTunnels(Grid2D<Element> &tunnelgrid);
 
     // ファイル作成
     void openFiles() const;
@@ -72,6 +72,7 @@ public:
 
     // トリガを適用させる
     void applyVoltageTriggers();
+
 };
 
 // コンストラクタ
@@ -79,12 +80,12 @@ template <typename Element>
 Simulation2D<Element>::Simulation2D(double dT, double EndTime)
     : t(0.0), dt(dT), endtime(EndTime), outputInterval(dT), nextOutputTime(0.0) {}
 
-// 最小wtを探索する
+// 最小wtをもつgridを探索する（最小wtがdtより小さいかどうかのbool, 最小のwtを持つgrid）
 template <typename Element>
 std::pair<bool, std::shared_ptr<Grid2D<Element>>> Simulation2D<Element>::comparewt()
 {
     double minwt = dt;
-    std::shared_ptr<Grid2D<Element>> tunnelelement = nullptr;
+    std::shared_ptr<Grid2D<Element>> tunnelgrid = nullptr;
     for (auto &grid : grids)
     {
         if (grid.gridminwt(dt))
@@ -93,20 +94,33 @@ std::pair<bool, std::shared_ptr<Grid2D<Element>>> Simulation2D<Element>::compare
             if (candidate < minwt)
             {
                 minwt = candidate;
-                tunnelelement = std::make_shared<Grid2D<Element>>(grid);
+                tunnelgrid = std::make_shared<Grid2D<Element>>(grid);
             }
         }
     }
-    if (minwt < dt)
-        return {true, tunnelelement};
+    if (minwt < dt) return {true, tunnelgrid};
     return {false, nullptr};
 }
 
+
 // トンネル処理を実行
 template <typename Element>
-void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelelement)
+void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
 {
-    tunnelelement.getTunnelPlace()->setTunnel(tunnelelement.getTunnelDirection());
+    auto ptr = tunnelgrid.getTunnelPlace();
+    //----------------トンネル場所の記録--------------------------------
+    auto [y, x] = tunnelgrid.getPositionOf(ptr);
+    std::ofstream log("output/tunnel_log.txt", std::ios::app);
+    if (log.is_open()) {
+        log << "t=" << t
+            << ", x=" << x
+            << ", y=" << y
+            << ", dir=" << tunnelgrid.getTunnelDirection()
+            << std::endl;
+    }
+    //-----------------------------------------------------------------
+    // 実際のトンネル処理
+    ptr->setTunnel(tunnelgrid.getTunnelDirection());
 }
 
 // ファイルを開く
@@ -184,7 +198,7 @@ void Simulation2D<Element>::outputTooyl()
                         vn *= -1.0;
                     }
             
-                    vnGrid[i - 1][j - 1] = vn;
+                    vnGrid[i-1][j-1] = vn;
                 }
             }            
 
@@ -237,10 +251,6 @@ void Simulation2D<Element>::runStep()
     {
         grid.updateGridQn(steptime);
     }
-    // if ((t >= 147.9 && t < 151.2)) {
-    //     auto& grid = grids[0];
-    //     std::cout << "[t=" << t << "] Vn(1,1) = " << grid.getElement(1,1)->getVn() << std::endl;
-    // }
 
     // tの増加
     t += steptime;
@@ -258,6 +268,8 @@ template <typename Element>
 void Simulation2D<Element>::run()
 {
     // openFiles();
+    // トンネルの場所を記録するファイルの出力（別関数にする予定）
+
     while (t < endtime)
     {
         runStep();

@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <string>
+#include <fstream>
 
 // 2次元グリッドで任意の素子（Element）を管理するテンプレートクラス
 template <typename Element>
@@ -83,6 +84,9 @@ public:
 
     // OutputEnabledの取得
     bool isOutputEnabled() const;
+
+    // ポインタから場所の座標を取得する
+    std::pair<int, int> getPositionOf(const std::shared_ptr<Element>& ptr) const;
 };
 
 // コンストラクタ：全要素をmake_sharedで初期化
@@ -168,6 +172,7 @@ bool Grid2D<Element>::gridminwt(const double dt)
         {
             if (elem->calculateTunnelWt())
             {
+                // up方向かdown方向で値を持っている方をtmpwtに代入
                 double tmpwt = std::max(elem->getWT()["up"], elem->getWT()["down"]);
                 tunneldirection = (tmpwt == elem->getWT()["up"]) ? "up" : "down";
                 tunnelplace = elem;
@@ -268,4 +273,18 @@ bool Grid2D<Element>::isOutputEnabled() const
 {
     return outputEnabled;
 }
+
+// ポインタから場所の座標を取得する
+template <typename Element>
+std::pair<int, int> Grid2D<Element>::getPositionOf(const std::shared_ptr<Element>& ptr) const {
+    for (int i = 0; i < rows_; ++i) {
+        for (int j = 0; j < cols_; ++j) {
+            if (grid[i][j] == ptr) {
+                return {i, j}; // (y, x)
+            }
+        }
+    }
+    throw std::runtime_error("Element pointer not found in grid");
+}
+
 #endif // GRID_2DIM_HPP
