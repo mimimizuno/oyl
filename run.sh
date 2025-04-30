@@ -8,8 +8,6 @@ rm -f output/*
 # ビルドフォルダに移動
 cd "$(dirname "$0")/build"
 
-# rm output/tunnelwtcalc_log.txt
-
 # CMakeで構成（初回またはCMakeLists.txt変更時だけ）
 if [ ! -f Makefile ]; then
 # -DBUILD_TESTING=ONだとテスト用ビルド込み。=OFFだとテスト用のビルドはしない

@@ -1,5 +1,5 @@
-#ifndef SEO_CLASS_HPP
-#define SEO_CLASS_HPP
+#ifndef MULTI_SEO_CLASS_HPP
+#define MULTI_SEO_CLASS_HPP
 
 #include <iostream>
 #include <vector>
@@ -15,7 +15,7 @@ constexpr double e = 0.1602; // 電子の電荷量
 
 using namespace std;
 
-class SEO {
+class MultiSEO {
 private:
     double Q;               // ノード電荷
     double Vn;              // ノード電圧
@@ -28,18 +28,20 @@ private:
     double V_sum;           // 周囲のノード電圧の総和
     map<string, double> dE; // エネルギー変化量(up, down)
     map<string, double> wt; // トンネル待時間(up, down)
-    vector<shared_ptr<SEO>> connection; // 接続されている素子のポインタ
+    vector<shared_ptr<MultiSEO>> connection; // 接続されている素子のポインタ
+    int multi_num;          // ジャンクションの数（多重の数）
+    int tunnel_num;         // トンネルした回数
 
 public:
     //-----------コンストラクタ---------// 
     // vectorの初期化用
-    SEO();
+    MultiSEO();
     // 引数あり初期設定用
-    SEO(double r, double rj, double cj, double c, double vd, int legscounts);
+    MultiSEO(double r, double rj, double cj, double c, double vd, int legscounts, int junction_num);
 
     //-----------セッター------------//
     // パラメータセットアップ
-    void setUp(double r, double rj, double cj, double c, double vd, int legscounts);
+    void setUp(double r, double rj, double cj, double c, double vd, int legscounts, int junction_num);
 
     // バイアス電圧を設定
     void setVias(const double vd);
@@ -48,7 +50,7 @@ public:
     void setVsum(double v);
 
     // 接続情報を設定
-    void setConnections(const vector<shared_ptr<SEO>> &connectedSEOs);
+    void setConnections(const vector<shared_ptr<MultiSEO>> &connectedSEOs);
 
     // 周囲の電圧を設定
     void setSurroundingVoltages();
@@ -73,7 +75,7 @@ public:
     double getVn() const;
 
     // 接続されてる振動子を取得
-    vector<shared_ptr<SEO>> getConnection() const;
+    vector<shared_ptr<MultiSEO>> getConnection() const;
 
     // 接続されてる振動子の電圧の総和を取得
     double getSurroundingVsum() const;
