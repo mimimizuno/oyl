@@ -29,6 +29,9 @@ private:
         outputs;
     // トリガを表すベクトル（どのgridか、時刻、位置、値)
     std::vector<std::tuple<Grid2D<Element>*,double, int, int, double>> voltageTriggers; // (grid, time, x, y, V)
+    // ファイル出力する素子をファイル名とともに格納するベクトル
+    std::vector<std::pair<std::ofstream*, std::shared_ptr<Element>>> selectedElements;
+
 
 public:
     // コンストラクタ(刻み時間,シミュレーションの終了タイミング)
@@ -38,7 +41,7 @@ public:
     std::pair<bool, std::shared_ptr<Grid2D<Element>>> comparewt();
 
     // トンネルの処理
-    void handleTunnels(Grid2D<Element> &tunnelelement);
+    void handleTunnels(Grid2D<Element> &tunnelgrid);
 
     // ファイル作成
     void openFiles() const;
@@ -72,6 +75,13 @@ public:
 
     // トリガを適用させる
     void applyVoltageTriggers();
+
+    // ファイル出力する素子とファイルを格納するベクトルに追加する
+    void addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element);
+
+    // selectedElementsから該当する素子のVnを記録するファイル出力
+    void outputSelectedElements();
+
 };
 
 // コンストラクタ
@@ -79,12 +89,12 @@ template <typename Element>
 Simulation2D<Element>::Simulation2D(double dT, double EndTime)
     : t(0.0), dt(dT), endtime(EndTime), outputInterval(dT), nextOutputTime(0.0) {}
 
-// 最小wtを探索する
+// 最小wtをもつgridを探索する（最小wtがdtより小さいかどうかのbool, 最小のwtを持つgrid）
 template <typename Element>
 std::pair<bool, std::shared_ptr<Grid2D<Element>>> Simulation2D<Element>::comparewt()
 {
     double minwt = dt;
-    std::shared_ptr<Grid2D<Element>> tunnelelement = nullptr;
+    std::shared_ptr<Grid2D<Element>> tunnelgrid = nullptr;
     for (auto &grid : grids)
     {
         if (grid.gridminwt(dt))
@@ -93,20 +103,33 @@ std::pair<bool, std::shared_ptr<Grid2D<Element>>> Simulation2D<Element>::compare
             if (candidate < minwt)
             {
                 minwt = candidate;
-                tunnelelement = std::make_shared<Grid2D<Element>>(grid);
+                tunnelgrid = std::make_shared<Grid2D<Element>>(grid);
             }
         }
     }
-    if (minwt < dt)
-        return {true, tunnelelement};
+    if (minwt < dt) return {true, tunnelgrid};
     return {false, nullptr};
 }
 
+
 // トンネル処理を実行
 template <typename Element>
-void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelelement)
+void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
 {
-    tunnelelement.getTunnelPlace()->setTunnel(tunnelelement.getTunnelDirection());
+    auto ptr = tunnelgrid.getTunnelPlace();
+    //----------------トンネル場所の記録--------------------------------
+    // auto [y, x] = tunnelgrid.getPositionOf(ptr);
+    // std::ofstream log("../output/tunnel_log.txt", std::ios::app);
+    // if (log.is_open()) {
+    //     log << "t=" << t
+    //         << ", x=" << x
+    //         << ", y=" << y
+    //         << ", dir=" << tunnelgrid.getTunnelDirection()
+    //         << std::endl;
+    // }
+    //-----------------------------------------------------------------
+    // 実際のトンネル処理
+    ptr->setTunnel(tunnelgrid.getTunnelDirection());
 }
 
 // ファイルを開く
@@ -132,12 +155,31 @@ void Simulation2D<Element>::closeFiles() const
 // 出力処理（未実装部分を仮追加）
 template <typename Element>
 void Simulation2D<Element>::outputToFile()
-{
+{    
     // if (accumulatedTime >= outputInterval)
     // {
     //     accumulatedTime -= outputInterval;
     //     // TODO: 各 printdatavector に対してデータを渡す処理を入れる
     // }
+}
+
+template <typename Element>
+void Simulation2D<Element>::addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element)
+{
+    selectedElements.emplace_back(&ofs, element);
+}
+
+template <typename Element>
+void Simulation2D<Element>::outputSelectedElements()
+{
+    for (auto& [ofsPtr, elemPtr] : selectedElements)
+    {
+        // pair型で格納したファイルと素子の情報からファイルに出力する
+        if (!ofsPtr || !(*ofsPtr) || !elemPtr)
+            // 情報がない場合はcontinue
+            continue;
+        (*ofsPtr) << t << " " << elemPtr->getVn() << endl;
+    }
 }
 
 // oyl-video形式に合わせた出力を生成
@@ -163,7 +205,7 @@ void Simulation2D<Element>::outputTooyl()
             }
             else
             {
-                label = "output" + std::to_string(outputIndex);
+                label = "../output" + std::to_string(outputIndex);
                 ++outputIndex;
             }
 
@@ -184,7 +226,7 @@ void Simulation2D<Element>::outputTooyl()
                         vn *= -1.0;
                     }
             
-                    vnGrid[i - 1][j - 1] = vn;
+                    vnGrid[i-1][j-1] = vn;
                 }
             }            
 
@@ -203,6 +245,8 @@ void Simulation2D<Element>::runStep()
 
     // oyl-video形式に出力
     outputTooyl();
+    // ファイル出力
+    outputSelectedElements();
 
     // grid全体のVn計算(5回計算してならす)
     for (int i = 0; i < 5; i++)
@@ -237,10 +281,6 @@ void Simulation2D<Element>::runStep()
     {
         grid.updateGridQn(steptime);
     }
-    // if ((t >= 147.9 && t < 151.2)) {
-    //     auto& grid = grids[0];
-    //     std::cout << "[t=" << t << "] Vn(1,1) = " << grid.getElement(1,1)->getVn() << std::endl;
-    // }
 
     // tの増加
     t += steptime;
@@ -258,6 +298,8 @@ template <typename Element>
 void Simulation2D<Element>::run()
 {
     // openFiles();
+    // トンネルの場所を記録するファイルの出力（別関数にする予定）
+
     while (t < endtime)
     {
         runStep();
@@ -287,7 +329,7 @@ template <typename Element>
 void Simulation2D<Element>::applyVoltageTriggers()
 {
     for (const auto& [gridPtr, triggerTime, x, y, voltage] : voltageTriggers) {
-        if (t >= triggerTime && t < triggerTime + dt) {
+        if (t >= triggerTime && t < triggerTime + dt * 10) {
             if (!gridPtr) {
                 throw std::invalid_argument("Trigger references a null grid pointer.");
             }

@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
-# ビルドフォルダに移動
-cd "$(dirname "$0")/build"
 # 出力ディレクトリ作成
 mkdir -p output
+# 出力ファイルのリセット
+rm -f output/*
+
+# ビルドフォルダに移動
+cd "$(dirname "$0")/build"
+
+# rm output/tunnelwtcalc_log.txt
 
 # CMakeで構成（初回またはCMakeLists.txt変更時だけ）
 if [ ! -f Makefile ]; then
