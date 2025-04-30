@@ -1,5 +1,6 @@
 # 実行ファイル、出力ファイル、vsコードの環境設定がgithubにアップロードされないように設定
 *.exe
 *.txt
+/output
 # CMakeListsだけは追跡するように設定
 !CMakeLists.txt
