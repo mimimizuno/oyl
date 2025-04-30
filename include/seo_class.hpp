@@ -9,8 +9,7 @@
 #include <stdexcept>
 #include <random>
 #include <memory>
-
-constexpr double e = 0.1602; // 電子の電荷量
+#include "constants.hpp"
 
 
 using namespace std;

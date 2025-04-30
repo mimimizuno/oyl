@@ -12,6 +12,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # ライブラリ（src/**.cpp のビルド）
 add_library(oyl-utils
  src/seo_class.cpp
+ src/multi_seo_class.cpp
  src/oyl_video.cpp
 )
 target_include_directories(oyl-utils PUBLIC ${PROJECT_SOURCE_DIR}/include)

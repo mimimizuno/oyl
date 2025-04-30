@@ -76,14 +76,14 @@ void MultiSEO::setSurroundingVoltages()
 // 振動子のパラメータ計算
 void MultiSEO::setPcalc()
 {
-    Vn = Q / Cj + (C / (Cj * (legs * C + Cj))) * (Cj * V_sum - legs * Q);
+    Vn = (multi_num * (Cj * Q + C * Cj * V_sum) - Cj * tunnel_num * e) / (Cj * (legs * multi_num * C + Cj));
 }
 
 // 振動子のエネルギー計算
 void MultiSEO::setdEcalc()
 {
-    dE["up"] = -e * (e - 2 * (Q + C * V_sum)) / (2 * (legs * C + Cj));
-    dE["down"] = -e * (e + 2 * (Q + C * V_sum)) / (2 * (legs * C + Cj));
+    dE["up"] = e * ((-(multi_num - 1) * legs + 2 * legs * tunnel_num) * C * e + Cj * (2 * Q - e) + 2 * C * Cj * V_sum) / (2 * Cj * (legs * multi_num * C + Cj));
+    dE["down"] = -e * (-(-(multi_num - 1) * legs - 2 * legs * tunnel_num) * C * e + Cj * (2 * Q + e) + 2 * C * Cj * V_sum) / (2 * Cj * (legs * multi_num * C + Cj));
 }
 
 // 電荷の更新
@@ -100,12 +100,23 @@ bool MultiSEO::calculateTunnelWt()
     wt["down"] = 0;
     if (dE["up"] > 0)
     {
-        wt["up"] = (e * e * Rj / dE["up"]) * log(1 / Random());
+        wt["up"] = 100;
+        // ジャンクションの数からトンネルした回数を引いた分だけwtを計算して最小値を算出
+        for (int rep = 0; rep < multi_num - abs(tunnel_num); rep++)
+        {
+            double tmpwt = (e * e * Rj / dE["up"]) * std::log(1 / Random());
+            wt["up"] = std::min(tmpwt, wt["up"]);
+        }
         return true;
     }
     if (dE["down"] > 0)
     {
-        wt["down"] = (e * e * Rj / dE["down"]) * log(1 / Random());
+        wt["down"] = 100;
+        for (int rep = 0; rep < multi_num - abs(tunnel_num); rep++)
+        {
+            double tmpwt = (e * e * Rj / dE["down"]) * std::log(1 / Random());
+            wt["down"] = std::min(tmpwt, wt["down"]);
+        }
         return true;
     }
     return false;
@@ -116,11 +127,23 @@ void MultiSEO::setTunnel(const string direction)
 {
     if (direction == "up")
     {
-        Q += -e;
+        // トンネル回数をカウント
+        tunnel_num++;
+        // トンネル回数がジャンクションの数が一致したときにQをアップデート、tunnel_numのリセット
+        if(abs(tunnel_num) == multi_num)
+        {
+            Q -= e;
+            tunnel_num = 0;
+        }
     }
     else if (direction == "down")
     {
-        Q += e;
+        tunnel_num--;
+        if(abs(tunnel_num) == multi_num)
+        {
+            Q += e;
+            tunnel_num = 0;
+        }
     }
     else
     {
