@@ -3,11 +3,7 @@
 # 出力ディレクトリ作成
 mkdir -p output
 # 出力ファイルのリセット
-rm output/seo.mp4
-rm output/tunnel_log.txt
-rm output/trrigerseo1515.txt
-rm output/trrigerseo1615.txt
-rm output/trrigerseo1715.txt
+rm -f output/*
 
 # ビルドフォルダに移動
 cd "$(dirname "$0")/build"

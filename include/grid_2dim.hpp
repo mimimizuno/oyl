@@ -174,9 +174,12 @@ bool Grid2D<Element>::gridminwt(const double dt)
             {
                 // up方向かdown方向で値を持っている方をtmpwtに代入
                 double tmpwt = std::max(elem->getWT()["up"], elem->getWT()["down"]);
-                tunneldirection = (tmpwt == elem->getWT()["up"]) ? "up" : "down";
-                tunnelplace = elem;
-                minwt = std::min(minwt, tmpwt);
+                // tmpwtがminwtよりも値が小さい時にminwtを更新
+                if(tmpwt < minwt){
+                    tunneldirection = (tmpwt == elem->getWT()["up"]) ? "up" : "down";
+                    tunnelplace = elem;
+                    minwt = std::min(minwt, tmpwt);
+                }
             }
         }
     }

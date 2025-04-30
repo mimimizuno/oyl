@@ -118,15 +118,15 @@ void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
 {
     auto ptr = tunnelgrid.getTunnelPlace();
     //----------------トンネル場所の記録--------------------------------
-    auto [y, x] = tunnelgrid.getPositionOf(ptr);
-    std::ofstream log("../output/tunnel_log.txt", std::ios::app);
-    if (log.is_open()) {
-        log << "t=" << t
-            << ", x=" << x
-            << ", y=" << y
-            << ", dir=" << tunnelgrid.getTunnelDirection()
-            << std::endl;
-    }
+    // auto [y, x] = tunnelgrid.getPositionOf(ptr);
+    // std::ofstream log("../output/tunnel_log.txt", std::ios::app);
+    // if (log.is_open()) {
+    //     log << "t=" << t
+    //         << ", x=" << x
+    //         << ", y=" << y
+    //         << ", dir=" << tunnelgrid.getTunnelDirection()
+    //         << std::endl;
+    // }
     //-----------------------------------------------------------------
     // 実際のトンネル処理
     ptr->setTunnel(tunnelgrid.getTunnelDirection());
@@ -266,7 +266,6 @@ void Simulation2D<Element>::runStep()
     for (auto &grid : grids)
     {
         grid.updateGriddE();
-        if(t > 100 && t < 101) cout << "t = "<< t << " ： " << grid.getElement(15,15)->getdE()["up"] << endl;
     }
 
     // wtの計算と比較
