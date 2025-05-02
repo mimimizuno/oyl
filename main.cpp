@@ -1,162 +1,194 @@
 // seoの２次元シミュレーション
 // --------------------------------------------------------------------------------
-// #include <iostream>
-// #include "seo_class.hpp"
-// #include "grid_2dim.hpp"
-// #include "simulation_2d.hpp"
-// #include "oyl_video.hpp"
-
-// constexpr int size_x = 32;
-// constexpr int size_y = 32;
-// constexpr double Vd = 0.0044;
-// constexpr double R = 0.5;
-// constexpr double Rj = 0.002;
-// constexpr double Cj = 10.0;
-// constexpr double C = 2.0;
-// constexpr double dt = 0.1;
-// constexpr double endtime = 200;
-
-// using Sim = Simulation2D<SEO>;
-// using Grid = Grid2D<SEO>;
-
-// int main()
-// {
-//     Grid grid(size_y, size_x, true);
-//     grid.setOutputLabel("seo");
-
-
-//     // SEO初期化と接続
-//     for (int y = 0; y < size_y; ++y)
-//     {
-//         for (int x = 0; x < size_x; ++x)
-//         {
-//             auto seo = grid.getElement(y, x);
-//             double biasVd = ((x + y) % 2 == 0) ? Vd : -Vd;
-//             seo->setUp(R, Rj, Cj, C, biasVd, 4);
-//             std::vector<std::shared_ptr<SEO>> connections;
-//             if (y > 0) connections.push_back(grid.getElement(y - 1, x));     // 上
-//             if (x < size_x - 1) connections.push_back(grid.getElement(y, x + 1)); // 右
-//             if (y < size_y - 1) connections.push_back(grid.getElement(y + 1, x)); // 下
-//             if (x > 0) connections.push_back(grid.getElement(y, x - 1));     // 左
-//             seo->setConnections(connections);
-//         }
-//     }
-//     Sim sim(dt, endtime);
-//     sim.addGrid({grid});
-
-//     // -------------------------------------------------------------
-//     // 素子単独のVn変化が見たい場合
-//     // std::ofstream selectedFile1("../output/trrigerseo1515.txt");
-//     // auto elem1 = grid.getElement(15,15);
-//     // sim.addSelectedElement(selectedFile1, elem1);
-//     // std::ofstream selectedFile2("../output/trrigerseo1615.txt");
-//     // auto elem2 = grid.getElement(16,15);
-//     // sim.addSelectedElement(selectedFile2, elem2);
-//     // -------------------------------------------------------------
-
-//     // 時刻100ns〜101nsの間、(15,15)の素子に0.006Vを加える
-//     sim.addVoltageTrigger(100, &grid, 15, 15, 0.006);
-//     sim.run();
-
-
-//     // 出力処理
-//     const auto& outputs = sim.getOutputs();
-//     if (outputs.count("seo"))
-//     {
-//         const auto& data = outputs.at("seo");
-//         auto normalized = oyl::normalizeto255(data);
-//         std::string label = grid.getOutputLabel();
-//         std::string filepath = "../output/" + label + ".mp4";
-//         oyl::VideoClass video(normalized);
-//         video.set_filename(filepath);
-//         video.set_codec(cv::VideoWriter::fourcc('m', 'p', '4', 'v')); // mp4対応コーデック
-//         video.set_fps(30.0);
-//         video.makevideo();
-//     }
-//     else
-//     {
-//         std::cerr << "[ERROR] No output data found for label 'seo'" << std::endl;
-//     }
-
-//     return 0;
-// }
-// --------------------------------------------------------------------------------
-
-// multi-seoの2次元シミュレーション
 #include <iostream>
-#include "multi_seo_class.hpp"
+#include "seo_class.hpp"
 #include "grid_2dim.hpp"
 #include "simulation_2d.hpp"
 #include "oyl_video.hpp"
 
 constexpr int size_x = 32;
 constexpr int size_y = 32;
-constexpr double Vd = 0.0042;
-constexpr double R = 1.5;
-constexpr double Rj = 0.001;
-constexpr double Cj = multi_Cj;
+constexpr double Vd = 0.0044;
+constexpr double R = 0.5;
+constexpr double Rj = 0.002;
+constexpr double Cj = 10.0;
 constexpr double C = 2.0;
 constexpr double dt = 0.1;
 constexpr double endtime = 200;
-constexpr int multi_num = 20;
 
-using Grid = Grid2D<MultiSEO>;
-using Sim = Simulation2D<MultiSEO>;
+using Sim = Simulation2D<SEO>;
+using Grid = Grid2D<SEO>;
 
 int main()
 {
     Grid grid(size_y, size_x, true);
-    grid.setOutputLabel("multiseo");
+    grid.setOutputLabel("seo");
 
-    // 多重振動子の初期化と接続
+
+    // SEO初期化と接続
     for (int y = 0; y < size_y; ++y)
     {
         for (int x = 0; x < size_x; ++x)
         {
-            auto multiseo = grid.getElement(y, x);
+            auto seo = grid.getElement(y, x);
             double biasVd = ((x + y) % 2 == 0) ? Vd : -Vd;
-            multiseo->setUp(R, Rj, Cj, C, biasVd, 4, multi_num);
-
-            std::vector<std::shared_ptr<MultiSEO>> connections;
-            if (y > 0) connections.push_back(grid.getElement(y - 1, x));         // 上
-            if (x < size_x - 1) connections.push_back(grid.getElement(y, x + 1));// 右
-            if (y < size_y - 1) connections.push_back(grid.getElement(y + 1, x));// 下
-            if (x > 0) connections.push_back(grid.getElement(y, x - 1));         // 左
-
-            multiseo->setConnections(connections);
+            seo->setUp(R, Rj, Cj, C, biasVd, 4);
+            std::vector<std::shared_ptr<SEO>> connections;
+            if (y > 0) connections.push_back(grid.getElement(y - 1, x));     // 上
+            if (x < size_x - 1) connections.push_back(grid.getElement(y, x + 1)); // 右
+            if (y < size_y - 1) connections.push_back(grid.getElement(y + 1, x)); // 下
+            if (x > 0) connections.push_back(grid.getElement(y, x - 1));     // 左
+            seo->setConnections(connections);
         }
     }
-
     Sim sim(dt, endtime);
     sim.addGrid({grid});
 
-    // トリガ設定：時刻150ns〜151nsの間、(1,1)の素子に0.006Vを加える
-    sim.addVoltageTrigger(150, &grid, 15, 15, 0.006);
-    std::ofstream selectedFile1("../output/trrigerseo1515.txt");
-    auto elem1 = grid.getElement(15,15);
-    sim.addSelectedElement(selectedFile1, elem1);
-    // 実行
+    // -------------------------------------------------------------
+    // 素子単独のVn変化が見たい場合
+    // std::ofstream selectedFile1("../output/trrigerseo1515.txt");
+    // auto elem1 = grid.getElement(15,15);
+    // sim.addSelectedElement(selectedFile1, elem1);
+    // std::ofstream selectedFile2("../output/trrigerseo1615.txt");
+    // auto elem2 = grid.getElement(16,15);
+    // sim.addSelectedElement(selectedFile2, elem2);
+    // -------------------------------------------------------------
+
+    // 時刻100ns〜101nsの間、(15,15)の素子に0.006Vを加える
+    sim.addVoltageTrigger(100, &grid, 15, 15, 0.006);
     sim.run();
+
 
     // 出力処理
     const auto& outputs = sim.getOutputs();
-    if (outputs.count("multiseo"))
+    if (outputs.count("seo"))
     {
-        const auto& data = outputs.at("multiseo");
+        const auto& data = outputs.at("seo");
         auto normalized = oyl::normalizeto255(data);
-        std::string filepath = "../output/multiseo.mp4";
-
+        std::string label = grid.getOutputLabel();
+        std::string filepath = "../output/" + label + ".mp4";
         oyl::VideoClass video(normalized);
         video.set_filename(filepath);
-        video.set_codec(cv::VideoWriter::fourcc('m', 'p', '4', 'v')); // mp4用コーデック
+        video.set_codec(cv::VideoWriter::fourcc('m', 'p', '4', 'v')); // mp4対応コーデック
         video.set_fps(30.0);
-        // video.set_scaleBar(true).set_cellsize(20);
         video.makevideo();
     }
     else
     {
-        std::cerr << "[ERROR] No output data found for label 'multiseo'" << std::endl;
+        std::cerr << "[ERROR] No output data found for label 'seo'" << std::endl;
     }
 
     return 0;
 }
+// --------------------------------------------------------------------------------
+
+// multi-seoの2次元シミュレーション
+// #include <iostream>
+// #include "multi_seo_class.hpp"
+// #include "grid_2dim.hpp"
+// #include "simulation_2d.hpp"
+// #include "oyl_video.hpp"
+
+// constexpr int size_x = 32;
+// constexpr int size_y = 32;
+// constexpr double Vd = 0.004;
+// constexpr double R = 1;
+// constexpr double Rj = 0.001;
+// constexpr double Cj = multi_Cj;
+// constexpr double C = 2.0;
+// constexpr double dt = 0.1;
+// constexpr double endtime = 300;
+// constexpr int multi_num = 20;
+
+// using Grid = Grid2D<MultiSEO>;
+// using Sim = Simulation2D<MultiSEO>;
+
+// int main()
+// {
+//     Grid grid(size_y, size_x, true);
+//     grid.setOutputLabel("multiseo");
+
+//     // // 多重振動子の初期化と接続
+//     // for (int y = 0; y < size_y; ++y)
+//     // {
+//     //     for (int x = 0; x < size_x; ++x)
+//     //     {
+//     //         auto multiseo = grid.getElement(y, x);
+//     //         double biasVd = ((x + y) % 2 == 0) ? Vd : -Vd;
+//     //         multiseo->setUp(R, Rj, Cj, C, biasVd, 4, multi_num);
+
+//     //         std::vector<std::shared_ptr<MultiSEO>> connections;
+//     //         if (y > 0) connections.push_back(grid.getElement(y - 1, x));         // 上
+//     //         if (x < size_x - 1) connections.push_back(grid.getElement(y, x + 1));// 右
+//     //         if (y < size_y - 1) connections.push_back(grid.getElement(y + 1, x));// 下
+//     //         if (x > 0) connections.push_back(grid.getElement(y, x - 1));         // 左
+
+//     //         multiseo->setConnections(connections);
+//     //     }
+//     // }
+
+//     for (int y = 0; y < size_y; ++y) {
+//         for (int x = 0; x < size_x; ++x) {
+//             auto multiseo = grid.getElement(y, x);
+    
+//             // 外枠ならVd=0、legs=0
+//             if (x == 0 || x == size_x - 1 || y == 0 || y == size_y - 1) {
+//                 multiseo->setUp(R, Rj, Cj, C, 0.0, 0, multi_num);
+//                 continue;
+//             }
+    
+//             // 中心部
+//             double biasVd = ((x + y) % 2 == 0) ? Vd : -Vd;
+    
+//             // 接続候補
+//             std::vector<std::shared_ptr<MultiSEO>> connections;
+//             if (y > 0) connections.push_back(grid.getElement(y - 1, x));
+//             if (x < size_x - 1) connections.push_back(grid.getElement(y, x + 1));
+//             if (y < size_y - 1) connections.push_back(grid.getElement(y + 1, x));
+//             if (x > 0) connections.push_back(grid.getElement(y, x - 1));
+    
+//             int legs = connections.size(); // 実際の接続数に応じて設定
+//             multiseo->setUp(R, Rj, Cj, C, biasVd, legs, multi_num);
+//             multiseo->setConnections(connections);
+//         }
+//     }
+    
+
+//     Sim sim(dt, endtime);
+//     sim.addGrid({grid});
+
+//     // トリガ設定：時刻150ns〜151nsの間、(15,15)の素子に0.006Vを加える
+//     sim.addVoltageTrigger(150, &grid, 15, 15, 0.006);
+//     std::ofstream selectedFile1("../output/trrigerseo1515.txt");
+//     auto elem1 = grid.getElement(15,15);
+//     sim.addSelectedElement(selectedFile1, elem1);
+//     std::ofstream selectedFile2("../output/trrigerseo11.txt");
+//     auto elem2 = grid.getElement(1,1);
+//     sim.addSelectedElement(selectedFile2, elem2);
+//     std::ofstream selectedFile3("../output/trrigerseo3030.txt");
+//     auto elem3 = grid.getElement(30,30);
+//     sim.addSelectedElement(selectedFile3, elem3);
+//     // 実行
+//     sim.run();
+
+//     // 出力処理
+//     const auto& outputs = sim.getOutputs();
+//     if (outputs.count("multiseo"))
+//     {
+//         const auto& data = outputs.at("multiseo");
+//         auto normalized = oyl::normalizeto255(data);
+//         std::string filepath = "../output/multiseo.mp4";
+
+//         oyl::VideoClass video(normalized);
+//         video.set_filename(filepath);
+//         video.set_codec(cv::VideoWriter::fourcc('m', 'p', '4', 'v'));
+//         video.set_fps(30.0);
+//         video.makevideo();
+//     }
+//     else
+//     {
+//         std::cerr << "[ERROR] No output data found for label 'multiseo'" << std::endl;
+//     }
+
+//     return 0;
+// }

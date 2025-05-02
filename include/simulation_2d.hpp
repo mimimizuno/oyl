@@ -265,7 +265,7 @@ void Simulation2D<Element>::runStep()
     // grid全体のdE計算
     for (auto &grid : grids)
     {    
-        if(t > 150 && t < 151) cout << "t = " << t << " dE = " << grid.getElement(15,15)->getdE()["up"] << endl;
+        // if(t > 150 && t < 151) cout << "t = " << t << " dE = " << grid.getElement(15,15)->getdE()["up"] << endl;
         grid.updateGriddE();
     }
 
