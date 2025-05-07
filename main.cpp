@@ -53,6 +53,13 @@ int main()
     // auto elem2 = grid.getElement(16,15);
     // sim.addSelectedElement(selectedFile2, elem2);
     // -------------------------------------------------------------
+    auto ofs = std::make_shared<std::ofstream>("../output/multivn.txt");
+    std::vector<std::shared_ptr<SEO>> targets = {
+        grid.getElement(15,15),
+        grid.getElement(16,15),
+        grid.getElement(17,15)
+    };
+    sim.addSelectedElements(ofs, targets);
 
     // 時刻100ns〜101nsの間、(15,15)の素子に0.006Vを加える
     sim.addVoltageTrigger(100, &grid, 15, 15, 0.006);
@@ -77,7 +84,6 @@ int main()
     {
         std::cerr << "[ERROR] No output data found for label 'seo'" << std::endl;
     }
-
     return 0;
 }
 // --------------------------------------------------------------------------------
