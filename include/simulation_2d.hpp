@@ -390,6 +390,13 @@ void Simulation2D<Element>::generateGnuplotScript(const std::string& dataFilenam
         std::cerr << "[ERROR] Failed to create gnuplot script: " << scriptFilename << std::endl;
         return;
     }
+    // 空のラベルがあるかチェック
+    for (size_t i = 0; i < labels.size(); ++i) {
+        if (labels[i].empty()) {
+            std::cerr << "[ERROR] Label for index " << i << " is empty. Cannot generate gnuplot script.\n";
+            return;
+        }
+    }
 
     gnuFile << "#unset key\n";
     gnuFile << "#set title 'no'\n";

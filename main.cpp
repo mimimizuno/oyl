@@ -44,15 +44,6 @@ int main()
     Sim sim(dt, endtime);
     sim.addGrid({grid});
 
-    // -------------------------------------------------------------
-    // 素子単独のVn変化が見たい場合
-    // std::ofstream selectedFile1("../output/trrigerseo1515.txt");
-    // auto elem1 = grid.getElement(15,15);
-    // sim.addSelectedElement(selectedFile1, elem1);
-    // std::ofstream selectedFile2("../output/trrigerseo1615.txt");
-    // auto elem2 = grid.getElement(16,15);
-    // sim.addSelectedElement(selectedFile2, elem2);
-    // -------------------------------------------------------------
     auto ofs = std::make_shared<std::ofstream>("../output/multivn.txt");
     std::vector<std::shared_ptr<SEO>> targets = {
         grid.getElement(15,15),
@@ -200,5 +191,71 @@ int main()
 //         std::cerr << "[ERROR] No output data found for label 'multiseo'" << std::endl;
 //     }
 
+//     return 0;
+// }
+//------------------------------------------------------------------------------------------
+// onewayのテスト
+// #include <iostream>
+// #include <fstream>
+// #include <memory>
+// #include <vector>
+// #include "seo_class.hpp"
+// #include "oneway_unit.hpp"
+// #include "grid_2dim.hpp"
+// #include "simulation_2d.hpp"
+// #include "constants.hpp"
+
+// constexpr double R = 0.5;
+// constexpr double Rj = 0.002;
+// constexpr double C = 2.0;
+// constexpr double Vd = 0.0044;
+// constexpr double dt = 0.1;
+// constexpr double endtime = 100;
+
+// using Unit = OnewayUnit<SEO>;
+// using Grid = Grid2D<Unit>;
+// using Sim = Simulation2D<Unit>;
+
+// int main()
+// {
+//     // 1x1のGridを作成
+//     Grid grid(3, 3, true); // 境界対策として3x3（中央の1マスのみ使用）
+//     grid.setOutputLabel("oneway");
+
+//     // 中央に一つだけOnewayUnitを配置
+//     auto unit = grid.getElement(1, 1);
+//     unit->setOnewayDirection("right");
+//     unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd);
+
+//     // SEOとの接続設定（dummyでもよい）
+//     std::shared_ptr<SEO> dummy_left = std::make_shared<SEO>();
+//     std::shared_ptr<SEO> dummy_right = std::make_shared<SEO>();
+//     unit->setOnewayConnections(dummy_left, dummy_right);
+
+//     // シミュレーション準備
+//     Sim sim(dt, endtime);
+//     sim.addGrid({grid});
+
+//     // トリガ：100ns〜101nsの間、内部素子0番に-0.006V加える
+//     auto internals = unit->getInternalElements();
+//     internals[0]->setVsum(internals[0]->getSurroundingVsum() - 0.006);
+
+//     // 電位変化を出力
+//     auto ofs = std::make_shared<std::ofstream>("../output/oneway_vn.txt");
+//     std::vector<std::shared_ptr<SEO>> targets;
+//     auto internals = unit->getInternalElements();
+//     for (const auto& elem : internals) {
+//         if (elem) targets.push_back(elem);
+//     }
+//     sim.addSelectedElements(ofs, targets); // Simulation2D<SEO> のときにOK
+
+
+//     std::vector<std::string> labels = {"ow0", "ow1", "ow2", "ow3"};
+//     sim.generateGnuplotScript("../output/oneway_vn.txt", labels);
+
+//     // 実行
+//     sim.run();
+
+//     std::cout << "Simulation finished. Output saved to oneway_vn.txt" << std::endl;
 //     return 0;
 // }
