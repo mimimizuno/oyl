@@ -60,6 +60,10 @@ int main()
         grid.getElement(17,15)
     };
     sim.addSelectedElements(ofs, targets);
+    // グラフラベル（座標）も同時に指定
+    std::vector<std::string> labels = {"1515", "1615", "1715"};
+    sim.generateGnuplotScript("../output/multivn.txt", labels);
+
 
     // 時刻100ns〜101nsの間、(15,15)の素子に0.006Vを加える
     sim.addVoltageTrigger(100, &grid, 15, 15, 0.006);

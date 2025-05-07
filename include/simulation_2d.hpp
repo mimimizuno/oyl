@@ -81,9 +81,12 @@ public:
 
     // ファイル出力する素子とファイルを格納するベクトルに追加する
     void addSelectedElements(std::shared_ptr<std::ofstream> ofs, const std::vector<std::shared_ptr<Element>>& elems);
+
     // selectedElementsから該当する素子のVnを記録するファイル出力
     void outputSelectedElements();
 
+    // gnuplot用データ出力
+    void generateGnuplotScript(const std::string& dataFilename, const std::vector<std::string>& labels);
 };
 
 // コンストラクタ
@@ -376,6 +379,34 @@ void Simulation2D<Element>::applyVoltageTriggers()
             elem->setVsum(elem->getSurroundingVsum() + voltage);
         }
     }
+}
+
+template <typename Element>
+void Simulation2D<Element>::generateGnuplotScript(const std::string& dataFilename, const std::vector<std::string>& labels)
+{
+    std::string scriptFilename = dataFilename.substr(0, dataFilename.find_last_of('.')) + "_gnu.txt";
+    std::ofstream gnuFile(scriptFilename);
+    if (!gnuFile.is_open()) {
+        std::cerr << "[ERROR] Failed to create gnuplot script: " << scriptFilename << std::endl;
+        return;
+    }
+
+    gnuFile << "#unset key\n";
+    gnuFile << "#set title 'no'\n";
+    gnuFile << "set terminal qt font \"Arial,10\"\n";
+    gnuFile << "set xl 't[ns]'\n";
+    gnuFile << "set yl 'V[V]'\n";
+    gnuFile << "\n";
+
+    gnuFile << "p ";
+    for (size_t i = 0; i < labels.size(); ++i) {
+        gnuFile << "'" << dataFilename << "' u 1:" << (i + 2) << " title '" << labels[i] << "' w steps lw 3";
+        if (i != labels.size() - 1)
+            gnuFile << ",\\\n  ";
+    }
+    gnuFile << "\n";
+
+    std::cout << "[INFO] Gnuplot script generated: " << scriptFilename << std::endl;
 }
 
 #endif // SIMULATION_2D_HPP
