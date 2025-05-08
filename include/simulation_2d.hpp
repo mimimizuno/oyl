@@ -30,7 +30,10 @@ private:
     // トリガを表すベクトル（どのgridか、時刻、位置、値)
     std::vector<std::tuple<Grid2D<Element>*,double, int, int, double>> voltageTriggers; // (grid, time, x, y, V)
     // ファイル出力する素子をファイル名とともに格納するベクトル
-    std::vector<std::pair<std::ofstream*, std::shared_ptr<Element>>> selectedElements;
+    // std::vector<std::pair<std::ofstream*, std::shared_ptr<Element>>> selectedElements;
+    // 複数素子を1つのファイルに出力するための構造
+    std::vector<std::pair<std::shared_ptr<std::ofstream>, std::vector<std::shared_ptr<Element>>>> selectedElements;
+
 
 
 public:
@@ -77,11 +80,13 @@ public:
     void applyVoltageTriggers();
 
     // ファイル出力する素子とファイルを格納するベクトルに追加する
-    void addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element);
+    void addSelectedElements(std::shared_ptr<std::ofstream> ofs, const std::vector<std::shared_ptr<Element>>& elems);
 
     // selectedElementsから該当する素子のVnを記録するファイル出力
     void outputSelectedElements();
 
+    // gnuplot用データ出力
+    void generateGnuplotScript(const std::string& dataFilename, const std::vector<std::string>& labels);
 };
 
 // コンストラクタ
@@ -163,22 +168,47 @@ void Simulation2D<Element>::outputToFile()
     // }
 }
 
+// template <typename Element>
+// void Simulation2D<Element>::addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element)
+// {
+//     selectedElements.emplace_back(&ofs, element);
+// }
 template <typename Element>
-void Simulation2D<Element>::addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element)
+void Simulation2D<Element>::addSelectedElements(std::shared_ptr<std::ofstream> ofs, const std::vector<std::shared_ptr<Element>>& elems)
 {
-    selectedElements.emplace_back(&ofs, element);
+    selectedElements.emplace_back(ofs, elems);
 }
 
+
+
+// template <typename Element>
+// void Simulation2D<Element>::outputSelectedElements()
+// {
+//     for (auto& [ofsPtr, elemPtr] : selectedElements)
+//     {
+//         // pair型で格納したファイルと素子の情報からファイルに出力する
+//         if (!ofsPtr || !(*ofsPtr) || !elemPtr)
+//             // 情報がない場合はcontinue
+//             continue;
+//         (*ofsPtr) << t << " " << elemPtr->getVn() << endl;
+//     }
+// }
 template <typename Element>
 void Simulation2D<Element>::outputSelectedElements()
 {
-    for (auto& [ofsPtr, elemPtr] : selectedElements)
+    for (auto& [ofsPtr, elemPtrs] : selectedElements)
     {
-        // pair型で格納したファイルと素子の情報からファイルに出力する
-        if (!ofsPtr || !(*ofsPtr) || !elemPtr)
-            // 情報がない場合はcontinue
-            continue;
-        (*ofsPtr) << t << " " << elemPtr->getVn() << endl;
+        if (!ofsPtr || !(*ofsPtr)) continue;  // ファイルが開けていない場合はスキップ
+
+        (*ofsPtr) << t;
+        for (const auto& elemPtr : elemPtrs)
+        {
+            if (elemPtr)
+                (*ofsPtr) << " " << elemPtr->getVn();
+            else
+                (*ofsPtr) << " nan";  // nullポインタの場合の保険
+        }
+        (*ofsPtr) << std::endl;
     }
 }
 
@@ -349,6 +379,41 @@ void Simulation2D<Element>::applyVoltageTriggers()
             elem->setVsum(elem->getSurroundingVsum() + voltage);
         }
     }
+}
+
+template <typename Element>
+void Simulation2D<Element>::generateGnuplotScript(const std::string& dataFilename, const std::vector<std::string>& labels)
+{
+    std::string scriptFilename = dataFilename.substr(0, dataFilename.find_last_of('.')) + "_gnu.txt";
+    std::ofstream gnuFile(scriptFilename);
+    if (!gnuFile.is_open()) {
+        std::cerr << "[ERROR] Failed to create gnuplot script: " << scriptFilename << std::endl;
+        return;
+    }
+    // 空のラベルがあるかチェック
+    for (size_t i = 0; i < labels.size(); ++i) {
+        if (labels[i].empty()) {
+            std::cerr << "[ERROR] Label for index " << i << " is empty. Cannot generate gnuplot script.\n";
+            return;
+        }
+    }
+
+    gnuFile << "#unset key\n";
+    gnuFile << "#set title 'no'\n";
+    gnuFile << "set terminal qt font \"Arial,10\"\n";
+    gnuFile << "set xl 't[ns]'\n";
+    gnuFile << "set yl 'V[V]'\n";
+    gnuFile << "\n";
+
+    gnuFile << "p ";
+    for (size_t i = 0; i < labels.size(); ++i) {
+        gnuFile << "'" << dataFilename << "' u 1:" << (i + 2) << " title '" << labels[i] << "' w steps lw 3";
+        if (i != labels.size() - 1)
+            gnuFile << ",\\\n  ";
+    }
+    gnuFile << "\n";
+
+    std::cout << "[INFO] Gnuplot script generated: " << scriptFilename << std::endl;
 }
 
 #endif // SIMULATION_2D_HPP

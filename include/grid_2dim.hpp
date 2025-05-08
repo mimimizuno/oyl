@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
+#include "base_element.hpp"
 
 // 2次元グリッドで任意の素子（Element）を管理するテンプレートクラス
 template <typename Element>
@@ -98,13 +99,6 @@ Grid2D<Element>::Grid2D(int rows, int cols, bool enableOutput)
     if (rows <= 0 || cols <= 0)
     {
         throw std::invalid_argument("Grid size must be positive");
-    }
-    for (int i = 0; i < rows; ++i)
-    {
-        for (int j = 0; j < cols; ++j)
-        {
-            grid[i][j] = std::make_shared<Element>();
-        }
     }
 }
 
