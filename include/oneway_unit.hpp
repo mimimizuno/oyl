@@ -2,6 +2,9 @@
 #define ONEWAY_UNIT_HPP
 
 #include "constants.hpp"
+#include "base_element.hpp"
+#include "seo_class.hpp"
+#include "multi_seo_class.hpp"
 #include <memory>
 #include <array>
 #include <vector>
@@ -10,17 +13,14 @@
 #include <cmath>
 #include <stdexcept>
 
-// 一方向伝導素子を表すテンプレートクラス
-// ElementはSEO, MultiSEOなどを想定
-
-template <typename Element>
-class OnewayUnit
+// 一方向伝導素子を表すクラス（BaseElementに対応）
+class OnewayUnit : public BaseElement
 {
 private:
-    std::array<std::shared_ptr<Element>, 4> ows; // 一方通行のための4つの素子を用意
-    std::string oneway_direction;                // 一方通行の方向("left"3から0の方向,"right"0から3の方向)
-    std::shared_ptr<Element> locate = nullptr;   // 最小wtを持つ素子
-    std::string tunnel_direction = "none";       // トンネルの方向を保持
+    std::array<std::shared_ptr<BaseElement>, 4> ows; // 一方通行のための4つの素子を用意
+    std::string oneway_direction;                      // 一方通行の方向("left"3から0の方向,"right"0から3の方向)
+    std::shared_ptr<BaseElement> locate = nullptr;     // 最小wtを持つ素子
+    std::string tunnel_direction = "none";            // トンネルの方向を保持
 
 public:
     // コンストラクタ：一方通行の向きと4つの素子を初期化（デフォルトは右向き。左向きにしたい場合は引数にleftを指定）
@@ -29,10 +29,6 @@ public:
         if (onewaydirection != "left" && onewaydirection != "right")
         {
             throw std::invalid_argument("OnewayUnit: direction must be \"left\" or \"right\"");
-        }
-        for (auto &elem : ows)
-        {
-            elem = std::make_shared<Element>();
         }
     }
 
@@ -46,54 +42,61 @@ public:
         oneway_direction = onewaydirection;
     }
 
+    // 一方通行の内部素子を手動設定（SEOやMultiSEOを入れる）
+    void setInternalElements(const std::array<std::shared_ptr<BaseElement>, 4> &elements)
+    {
+        ows = elements;
+    }
+
     // 一方通行の中身の素子(seo)にパラメータを付与(R,Rj,Cj_leg2,Cj_leg3,C,Vd)
     void setOnewaySeoParam(double r, double rj, double cj_leg2, double cj_leg3, double c, double vd)
     {
         double vias = -vd + ((c * e) / ((3 * c + cj_leg3) * (2 * c + cj_leg2)));
         for (int i = 0; i < 4; i++)
         {
+            auto ptr = std::dynamic_pointer_cast<SEO>(ows[i]);
             if (i == 0 || i == 3)
             {
-                ows[i]->setUp(r, rj, cj_leg3, c, -vd, 3);
+                ptr->setUp(r, rj, cj_leg3, c, -vd, 3);
             }
             else
             {
-                ows[i]->setUp(r, rj, cj_leg2, c, vd, 2);
+                ptr->setUp(r, rj, cj_leg2, c, vd, 2);
             }
         }
         if (oneway_direction == "right")
-            ows[3]->setVias(vias);
+            std::dynamic_pointer_cast<SEO>(ows[3])->setVias(vias);
         else
-            ows[0]->setVias(vias);
+            std::dynamic_pointer_cast<SEO>(ows[0])->setVias(vias);
     }
 
     // 一方通行の中身の素子(multiseo)にパラメータを付与(R,Rj,Cj_leg2,Cj_leg3,C,Vd,multi_num)
-    void setOnewaySeoParam(double r, double rj, double cj_leg2, double cj_leg3, double c, double vd, int junction_num)
+    void setOnewayMultiSeoParam(double r, double rj, double cj_leg2, double cj_leg3, double c, double vd, int junction_num)
     {
         double vias = -vd + ((c * e) / ((3 * c + cj_leg3) * (2 * c + cj_leg2)));
         for (int i = 0; i < 4; i++)
         {
+            auto ptr = std::dynamic_pointer_cast<MultiSEO>(ows[i]);
             if (i == 0 || i == 3)
             {
-                ows[i]->setUp(r, rj, cj_leg3, c, -vd, 3, junction_num);
+                ptr->setUp(r, rj, cj_leg3, c, -vd, 3, junction_num);
             }
             else
             {
-                ows[i]->setUp(r, rj, cj_leg2, c, vd, 2, junction_num);
+                ptr->setUp(r, rj, cj_leg2, c, vd, 2, junction_num);
             }
         }
         if (oneway_direction == "right")
-            ows[3]->setVias(vias);
+            std::dynamic_pointer_cast<MultiSEO>(ows[3])->setVias(vias);
         else
-            ows[0]->setVias(vias);
+            std::dynamic_pointer_cast<MultiSEO>(ows[0])->setVias(vias);
     }
-
     // 両端の素子を含むconnectionの設定
-    void setOnewayConnections(std::shared_ptr<Element> left_elem, std::shared_ptr<Element> right_elem)
+    void setOnewayConnections(std::shared_ptr<BaseElement> left_elem, std::shared_ptr<BaseElement> right_elem)
     {
         for (int i = 0; i < 4; i++)
         {
-            std::vector<std::shared_ptr<Element>> connections;
+            std::vector<std::shared_ptr<BaseElement>> connections;
             if (i == 0)
             {
                 connections.push_back(left_elem);
@@ -117,40 +120,34 @@ public:
 
     // getVnなど、定義しないとgrid_2dimなどでエラーが発生するため素子0を返す
     // 出力電位Vnを返す（代表として素子0を利用）
-    double getVn() const
-    {
-        return ows[0]->getVn();
-    }
+    double getVn() const override { return ows[0]->getVn(); }
 
     // 印加電圧Vdを返す（代表として素子0を利用）
-    double getVd() const
-    {
-        return ows[0]->getVd();
-    }
+    double getVd() const override { return ows[0]->getVd(); }
 
     // 接続素子の周辺電圧を設定
-    void setSurroundingVoltages()
+    void setSurroundingVoltages() override
     {
         for (auto &e : ows)
             e->setSurroundingVoltages();
     }
 
     // 接続素子の確率計算を実行
-    void setPcalc()
+    void setPcalc() override
     {
         for (auto &e : ows)
             e->setPcalc();
     }
 
     // 接続素子のエネルギー差を計算
-    void setdEcalc()
+    void setdEcalc() override
     {
         for (auto &e : ows)
             e->setdEcalc();
     }
 
     // 最小トンネル待ち時間を計算し、対象素子と方向を記録
-    bool calculateTunnelWt()
+    bool calculateTunnelWt() override
     {
         double min_wt = 1e9;
         bool found = false;
@@ -175,24 +172,24 @@ public:
     }
 
     // 最小トンネル素子のWT（待ち時間）を返す（locateが存在しなければ空のmapを返す）
-    std::map<std::string, double> getWT() const
+    std::map<std::string, double> getWT() const override
     {
         return locate ? locate->getWT() : std::map<std::string, double>{};
     }
 
     // 全ての素子に対して電荷の更新処理を行う
-    void setNodeCharge(double dt)
+    void setNodeCharge(double dt) override
     {
         for (auto &e : ows)
             e->setNodeCharge(dt);
     }
 
     // 最小wt素子に対してトンネルを設定
-    void setTunnel()
+    void setTunnel(const std::string &direction) override
     {
         if (locate)
         {
-            locate->setTunnel(tunnel_direction);
+            locate->setTunnel(direction);
         }
     }
 
@@ -203,8 +200,29 @@ public:
     }
 
     // 内部の素子群を取得（デバッグや出力用）
-    const std::array<std::shared_ptr<Element>, 4>& getInternalElements() const {
+    const std::array<std::shared_ptr<BaseElement>, 4> &getInternalElements() const
+    {
         return ows;
+    }
+
+    // 周辺電圧合計を取得（代表素子に委譲）
+    double getSurroundingVsum() const override
+    {
+        return ows[0]->getSurroundingVsum();
+    }
+
+    // Vsum設定（各素子に一括）
+    void setVsum(double v) override
+    {
+        for (auto &e : ows)
+            e->setVsum(v);
+    }
+
+    // 接続を一括で設定
+    void setConnections(const std::vector<std::shared_ptr<BaseElement>> &conns) override
+    {
+        for (auto &e : ows)
+            e->setConnections(conns);
     }
 };
 
