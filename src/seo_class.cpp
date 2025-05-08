@@ -12,7 +12,7 @@ SEO::SEO() : R(0), Rj(0), Cj(0), C(0), Vd(0), Q(0), Vn(0), legs(0), V_sum(0)
 // 初期値あり
 SEO::SEO(double r, double rj, double cj, double c, double vd, int legscounts)
     : R(r), Rj(rj), Cj(cj), C(c), Vd(vd), Q(0.0), Vn(0.0), legs(legscounts),
-      V_sum(0.0), connection(0)
+      V_sum(0.0)
 {
     dE["up"] = 0.0;
     dE["down"] = 0.0;
@@ -45,20 +45,16 @@ void SEO::setVsum(double v)
 }
 
 // 接続情報を設定
-void SEO::setConnections(const vector<shared_ptr<SEO>> &connectedSEOs)
-{
-    connection.clear();
-    if (connectedSEOs.size() > legs)
-    {
-        throw invalid_argument("The size of connections must match the number of legs.");
+void SEO::setConnections(const std::vector<std::shared_ptr<BaseElement>>& conns) {
+    connections.clear();
+    if (conns.size() > legs) {
+        throw std::invalid_argument("Too many connections for the number of legs.");
     }
-    for (const auto &seo : connectedSEOs)
-    {
-        if (this == seo.get())
-        {
-            throw invalid_argument("Cannot connect to itself.");
+    for (const auto& elem : conns) {
+        if (elem.get() == this) {
+            throw std::invalid_argument("Cannot connect to itself.");
         }
-        connection.push_back(seo);
+        connections.push_back(elem);
     }
 }
 
@@ -66,9 +62,9 @@ void SEO::setConnections(const vector<shared_ptr<SEO>> &connectedSEOs)
 void SEO::setSurroundingVoltages()
 {
     V_sum = 0;
-    for (auto seo : connection)
+    for (auto elem : connections)
     {
-        V_sum += seo->Vn;
+        V_sum += elem->getVn();
     }
 }
 
@@ -99,19 +95,19 @@ bool SEO::calculateTunnelWt()
     wt["down"] = 0;
     if (dE["up"] > 0)
     {
-        wt["up"] = (e * e * Rj / dE["up"]) * log(1 / Random());
+        wt["up"] = (e * e * Rj / dE["up"]) * std::log(1 / Random());
         return true;
     }
     if (dE["down"] > 0)
     {
-        wt["down"] = (e * e * Rj / dE["down"]) * log(1 / Random());
+        wt["down"] = (e * e * Rj / dE["down"]) * std::log(1 / Random());
         return true;
     }
     return false;
 }
 
 // 振動子のトンネル
-void SEO::setTunnel(const string direction)
+void SEO::setTunnel(const std::string& direction)
 {
     if (direction == "up")
     {
@@ -123,7 +119,7 @@ void SEO::setTunnel(const string direction)
     }
     else
     {
-        throw invalid_argument("Invalid tunnel direction");
+        throw std::invalid_argument("Invalid tunnel direction");
     }
 }
 //-----------ゲッター------------//
@@ -134,11 +130,11 @@ double SEO::getVn() const
     return Vn;
 }
 
-// 接続されてる振動子を取得
-vector<shared_ptr<SEO>> SEO::getConnection() const
-{
-    return connection;
-}
+// // 接続されてる振動子を取得
+// std::vector<shared_ptr<SEO>> SEO::getConnection() const
+// {
+//     return connections;
+// }
 
 // 接続されてる振動子の電圧の総和を取得
 double SEO::getSurroundingVsum() const
@@ -147,7 +143,7 @@ double SEO::getSurroundingVsum() const
 }
 
 // dEの取得
-map<string, double> SEO::getdE() const
+std::map<std::string, double> SEO::getdE() const
 {
     return dE;
 }
@@ -159,7 +155,7 @@ double SEO::getQ() const
 }
 
 // wtの取得
-map<string, double> SEO::getWT() const
+std::map<std::string, double> SEO::getWT() const
 {
     return wt;
 }
@@ -168,9 +164,9 @@ map<string, double> SEO::getWT() const
 // 0から1の間の乱数を生成
 double SEO::Random()
 {
-    static random_device rd;
-    static mt19937 mt(rd());
-    static uniform_real_distribution<double> dist(0.0, 1.0);
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    static std::uniform_real_distribution<double> dist(0.0, 1.0);
     return dist(mt);
 }
 
@@ -212,7 +208,7 @@ int SEO::getlegs() const
 }
 
 // テスト用dEセッター
-void SEO::setdE(const string &direction, double value)
+void SEO::setdE(const std::string &direction, double value)
 {
     dE[direction] = value;
 }

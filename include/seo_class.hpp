@@ -9,12 +9,10 @@
 #include <stdexcept>
 #include <random>
 #include <memory>
+#include "base_element.hpp"
 #include "constants.hpp"
 
-
-using namespace std;
-
-class SEO {
+class SEO : public BaseElement {
 private:
     double Q;               // ノード電荷
     double Vn;              // ノード電圧
@@ -25,9 +23,10 @@ private:
     double C;               // 接続容量
     int legs;               // 足の数
     double V_sum;           // 周囲のノード電圧の総和
-    map<string, double> dE; // エネルギー変化量(up, down)
-    map<string, double> wt; // トンネル待時間(up, down)
-    vector<shared_ptr<SEO>> connection; // 接続されている素子のポインタ
+    std::map<std::string, double> dE; // エネルギー変化量(up, down)
+    std::map<std::string, double> wt; // トンネル待時間(up, down)
+    // std::vector<std::shared_ptr<SEO>> connection; // 接続されている素子のポインタ
+    std::vector<std::shared_ptr<BaseElement>> connections;  // 接続されている素子のポインタ
 
 public:
     //-----------コンストラクタ---------// 
@@ -44,47 +43,49 @@ public:
     void setVias(const double vd);
 
     // V_sumを設定
-    void setVsum(double v);
+    void setVsum(double v) override;
 
     // 接続情報を設定
-    void setConnections(const vector<shared_ptr<SEO>> &connectedSEOs);
+    // void setConnections(const std::vector<std::shared_ptr<SEO>> &connectedSEOs);
+
+    void setConnections(const std::vector<std::shared_ptr<BaseElement>>& conns) override;
 
     // 周囲の電圧を設定
-    void setSurroundingVoltages();
+    void setSurroundingVoltages() override;
 
     // 振動子のパラメータ計算
-    void setPcalc();
+    void setPcalc() override;
 
     // 振動子のエネルギー計算
-    void setdEcalc();
+    void setdEcalc() override;
 
     // 電荷の更新
-    void setNodeCharge(const double dt);
+    void setNodeCharge(const double dt) override;
 
     // トンネル待ち時間計算(upまたはdownが正の時にwtを計算してtrueを返す)
-    bool calculateTunnelWt();
+    bool calculateTunnelWt() override;
 
     // 振動子のトンネル
-    void setTunnel(const string direction);
+    void setTunnel(const std::string& direction) override;
 
     //-----------ゲッター------------//    
     // ノード電圧を取得
-    double getVn() const;
+    double getVn() const override;
 
-    // 接続されてる振動子を取得
-    vector<shared_ptr<SEO>> getConnection() const;
+    // // 接続されてる振動子を取得
+    // std::vector<std::shared_ptr<SEO>> getConnection() const;
 
     // 接続されてる振動子の電圧の総和を取得
-    double getSurroundingVsum() const;
+    double getSurroundingVsum() const override;
 
     // dEの取得
-    map<string, double> getdE() const;
+    std::map<std::string, double> getdE() const;
 
     // Qの取得
     double getQ() const;
 
     // wtの取得
-    map<string, double> getWT() const;
+    std::map<std::string, double> getWT() const override;
 
     //-------- 汎用処理 -------------//
     // 0から1の間の乱数を生成
@@ -106,14 +107,14 @@ public:
     // テスト用Cゲッター
     double getC() const;
 
-    // テスト用Vdゲッター
-    double getVd() const;
+    // Vdゲッター
+    double getVd() const override;
     
     // テスト用legsゲッター
     int getlegs() const;
 
     // テスト用dEセッター
-    void setdE(const string& direction, double value);
+    void setdE(const std::string& direction, double value);
 
     // テスト用Vnセッター
     void setVn(double vn);
