@@ -3,6 +3,7 @@
 #define PARTICLE_COMPUTATION_METHODS_HPP
 
 #include "grid_2dim.hpp"
+#include "constants.hpp"
 #include <vector>
 #include <stdexcept>
 
@@ -63,9 +64,12 @@ void setMazeBiasWithDirection(
     const std::vector<std::vector<int>>& maze,
     const std::string& direction,
     double Vd_normal,
-    double Vd_medium,
+    double c = 2.0,
+    double cj_leg2 = Cj_leg2,
+    double cj_leg3 = Cj_leg3,
     double Vd_wall = 0.0
 ) {
+    double Vd_lower = Vd_normal - ((c * e) / ((3 * c + cj_leg3) * (2 * c + cj_leg2)));
     int rows = grid.numRows();
     int cols = grid.numCols();
 
@@ -112,7 +116,7 @@ void setMazeBiasWithDirection(
             }
 
             if (wallDetected) {
-                elem->setVias(Vd_medium); // 障害物あり ⇒ 中くらい電圧
+                elem->setVias(Vd_lower); // 障害物あり ⇒ 中くらい電圧
             } else {
                 elem->setVias(Vd_normal); // 通常通路
             }
