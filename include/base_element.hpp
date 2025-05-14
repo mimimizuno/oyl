@@ -23,9 +23,9 @@ public:
     virtual std::map<std::string, double> getWT() const = 0;
 
     // --- 状態設定 ---
+    virtual void setVias(const double Vd) = 0;
     virtual void setVsum(double V) = 0;
     virtual void setConnections(const std::vector<std::shared_ptr<BaseElement>>& conns) = 0;
-
 
     // --- 計算処理 ---
     virtual void setSurroundingVoltages() = 0;

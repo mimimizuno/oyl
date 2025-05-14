@@ -41,7 +41,7 @@ public:
     void setUp(double r, double rj, double cj, double c, double vd, int legscounts, int junction_num);
 
     // バイアス電圧を設定
-    void setVias(const double vd);
+    void setVias(const double vd) override;
 
     // V_sumを設定
     void setVsum(double v) override;

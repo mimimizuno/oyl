@@ -224,6 +224,10 @@ public:
         for (auto &e : ows)
             e->setConnections(conns);
     }
+
+    // setViasをオーバーライドするためのダミー関数
+    void seVias(const double vd){
+    }
 };
 
 #endif // ONEWAY_UNIT_HPP
