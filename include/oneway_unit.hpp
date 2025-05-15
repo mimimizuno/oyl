@@ -228,6 +228,15 @@ public:
     // setViasをオーバーライドするためのダミー関数
     void seVias(const double vd){
     }
+
+    // indexを引数にして内部の要素を取り出す関数
+    std::shared_ptr<BaseElement> getInternalElement(int index) const override {
+        if (index < 0 || index >= 4) {
+            throw std::out_of_range("Internal element index out of range.");
+        }
+        return ows[index];
+    }
+
 };
 
 #endif // ONEWAY_UNIT_HPP

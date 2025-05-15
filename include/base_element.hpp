@@ -21,6 +21,8 @@ public:
     virtual double getVd() const = 0;
     virtual double getSurroundingVsum() const = 0;
     virtual std::map<std::string, double> getWT() const = 0;
+    // oneway用の中要素を取り出すメソッド（seoやmultiseoで呼び出すとエラーが発生する）
+    virtual std::shared_ptr<BaseElement> getInternalElement(int index) const = 0;
 
     // --- 状態設定 ---
     virtual void setVias(const double Vd) = 0;

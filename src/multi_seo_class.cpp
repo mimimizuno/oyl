@@ -188,6 +188,12 @@ std::map<std::string, double> MultiSEO::getWT() const
     return wt;
 }
 
+// oneway用の関数のため呼び出すとエラー発生
+std::shared_ptr<BaseElement> MultiSEO::getInternalElement(int index) const 
+{
+    throw std::runtime_error("This element does not have internal elements.");
+}
+
 //-------- 汎用処理 -------------//
 // 0から1の間の乱数を生成
 double MultiSEO::Random()

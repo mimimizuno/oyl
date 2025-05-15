@@ -86,6 +86,8 @@ public:
     // Vdの取得
     double getVd() const override;
 
+    // oneway用の関数のため呼び出すとエラー発生
+    std::shared_ptr<BaseElement> getInternalElement(int index) const override;
     //-------- 汎用処理 -------------//
     // 0から1の間の乱数を生成
     double Random();
