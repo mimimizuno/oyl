@@ -226,7 +226,8 @@ public:
     }
 
     // setViasをオーバーライドするためのダミー関数
-    void seVias(const double vd){
+    void setVias(const double vd) override{
+        throw std::runtime_error("This element does not have internal elements.");
     }
 
     // indexを引数にして内部の要素を取り出す関数

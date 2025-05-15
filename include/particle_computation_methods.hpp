@@ -32,7 +32,7 @@ void setMazeBias(Grid2D<Element>& grid, const std::vector<std::vector<int>>& maz
 
     // mazeのサイズチェック
     if (vertical_expand) {
-        if (maze.size() != static_cast<size_t>((rows - 2) / particles)) {
+        if (maze.size() != static_cast<size_t>((rows - 2) / 2)) {
             throw std::invalid_argument("Maze height must match (grid rows - 2) / particles for left/right direction.");
         }
         for (const auto& row : maze) {
@@ -45,7 +45,7 @@ void setMazeBias(Grid2D<Element>& grid, const std::vector<std::vector<int>>& maz
             throw std::invalid_argument("Maze height must match (grid rows - 2) for up/down direction.");
         }
         for (const auto& row : maze) {
-            if (row.size() != static_cast<size_t>((cols - 2) / particles)) {
+            if (row.size() != static_cast<size_t>((cols - 2) / 2)) {
                 throw std::invalid_argument("Maze width must match (grid cols - 2) / particles for up/down direction.");
             }
         }

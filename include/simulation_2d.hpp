@@ -354,14 +354,14 @@ const std::map<std::string, std::vector<std::vector<std::vector<double>>>> &Simu
 }
 
 template <typename Element>
-void Simulation2D<Element>::addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int x, int y, double voltage) {
-    voltageTriggers.emplace_back(grid, triggerTime, x, y, voltage);
+void Simulation2D<Element>::addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int y, int x, double voltage) {
+    voltageTriggers.emplace_back(grid, triggerTime, y, x, voltage);
 }
 
 template <typename Element>
 void Simulation2D<Element>::applyVoltageTriggers()
 {
-    for (const auto& [gridPtr, triggerTime, x, y, voltage] : voltageTriggers) {
+    for (const auto& [gridPtr, triggerTime, y, x, voltage] : voltageTriggers) {
         if (t >= triggerTime && t < triggerTime + dt * 10) {
             if (!gridPtr) {
                 throw std::invalid_argument("Trigger references a null grid pointer.");

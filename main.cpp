@@ -141,24 +141,45 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_down.setElement(y, x, unit);
+                if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows() - 1){
+                    unit->setConnections({command_down.getElement(y,x),command_down.getElement(y+1,x)});
+                }
             }
             {
-                // onway_CtoD_down
+                // oneway_CtoD_down
                 auto unit = std::make_shared<OnewayUnit>("right");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_CtoD_down.setElement(y, x, unit);
+                if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
+                    int cordinated_x = x / 2;
+                    if(x % particles == 1){
+                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x)});
+                    }
+                    else {
+                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1)});
+                    }
+                }
             }
             {
-                // onway_DtoC_downtoleft
+                // oneway_DtoC_downtoleft
                 auto unit = std::make_shared<OnewayUnit>("right");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_DtoC_downtoleft.setElement(y, x, unit);
+                if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
+                    int cordinated_y = y / 2;
+                    if(y % particles == 1){
+                        unit->setConnections({detection_down.getElement(cordinated_y + 1, x),command_left.getElement(y, x)});
+                    }
+                    else {
+                        unit->setConnections({detection_down.getElement(cordinated_y, x),command_left.getElement(y, x)});
+                    }
+                }
             }
             {
                 // onway_command_left
@@ -168,6 +189,9 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_left.setElement(y, x, unit);
+                if(x > 0 && x < command_left.numCols() - 1 && y > 0 && y < command_left.numRows()){
+                    unit->setConnections({command_left.getElement(y,x),command_left.getElement(y,x+1)});
+                }
             }
             {
                 // onway_CtoD_left
@@ -177,33 +201,63 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_CtoD_left.setElement(y, x, unit);
+                if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
+                    int cordinated_y = y / 2;
+                    if(y % particles == 1){
+                        unit->setConnections({command_left.getElement(y,x),detection_left.getElement(cordinated_y, x)});
+                    }
+                    else {
+                        unit->setConnections({command_left.getElement(y,x),detection_left.getElement(cordinated_y + 1, x)});
+                    }
+                }
             }
             {
-                // onway_DtoC_lefttoup
+                // oneway_DtoC_lefttoup
                 auto unit = std::make_shared<OnewayUnit>("right");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_DtoC_lefttoup.setElement(y, x, unit);
+                if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows()){
+                    int cordinated_x = x / 2;
+                    if(x % particles == 1){
+                        unit->setConnections({detection_left.getElement(y, cordinated_x + 1),command_up.getElement(y, x)});
+                    }
+                    else {
+                        unit->setConnections({detection_left.getElement(y, cordinated_x),command_up.getElement(y, x)});
+                    }
+                }
             }
             {
-                // onway_command_up
+                // oneway_command_up
                 auto unit = std::make_shared<OnewayUnit>("right");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_up.setElement(y, x, unit);
+                if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows() - 1){
+                    unit->setConnections({command_up.getElement(y,x),command_up.getElement(y + 1,x)});
+                }
             }
             {
-                // onway_CtoD_up
+                // oneway_CtoD_up
                 auto unit = std::make_shared<OnewayUnit>("right");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_CtoD_up.setElement(y, x, unit);
+                if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows()){
+                    int cordinated_x = x / 2;
+                    if(x % particles == 1){
+                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x)});
+                    }
+                    else {
+                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1)});
+                    }
+                }
             }
             {
                 // onway_DtoC_uptoright
@@ -213,6 +267,15 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_DtoC_uptoright.setElement(y, x, unit);
+                if(x > 0 && x < command_right.numCols() && y > 0 && y < command_right.numRows()){
+                    int cordinated_y = y / 2;
+                    if(y % particles == 1){
+                        unit->setConnections({detection_up.getElement(cordinated_y + 1, x),command_right.getElement(y, x)});
+                    }
+                    else {
+                        unit->setConnections({detection_up.getElement(cordinated_y, x),command_right.getElement(y, x)});
+                    }
+                }
             }
             {
                 // onway_command_right
@@ -222,6 +285,9 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_right.setElement(y, x, unit);
+                if(x > 0 && x < command_right.numCols() - 1 && y > 0 && y < command_right.numRows()){
+                    unit->setConnections({command_right.getElement(y,x),command_right.getElement(y,x + 1)});
+                }
             }
             {
                 // onway_CtoD_right
@@ -231,6 +297,15 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_CtoD_right.setElement(y, x, unit);
+                if(x > 0 && x < command_right.numCols() && y > 0 && y < command_right.numRows()){
+                    int cordinated_y = y / 2;
+                    if(y % particles == 1){
+                        unit->setConnections({command_right.getElement(y,x),detection_right.getElement(cordinated_y, x)});
+                    }
+                    else {
+                        unit->setConnections({command_right.getElement(y,x),detection_right.getElement(cordinated_y + 1, x)});
+                    }
+                }
             }
             {
                 // onway_DtoC_righttodown
@@ -240,255 +315,189 @@ int main()
                 unit->setInternalElements(internal_seos);
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_DtoC_righttodown.setElement(y, x, unit);
-            }
-        }
-    }
-
-    // === 接続設定（上下左右＋上下層） ===
-    for (int y = 0; y < size_y; ++y)
-    {
-        for (int x = 0; x < size_x; ++x)
-        {
-            {
-                auto center = grid1.getElement(y, x);
-                std::vector<std::shared_ptr<BaseElement>> neighbors;
-                if (y > 0)
-                    neighbors.push_back(grid1.getElement(y - 1, x));
-                if (x < size_x - 1)
-                    neighbors.push_back(grid1.getElement(y, x + 1));
-                if (y < size_y - 1)
-                    neighbors.push_back(grid1.getElement(y + 1, x));
-                if (x > 0)
-                    neighbors.push_back(grid1.getElement(y, x - 1));
-                neighbors.push_back(grid2.getElement(y, x)); // grid2との接続
-                center->setConnections(neighbors);
-            }
-
-            {
-                auto center = grid2.getElement(y, x);
-                std::vector<std::shared_ptr<BaseElement>> neighbors;
-                if (y > 0)
-                    neighbors.push_back(grid2.getElement(y - 1, x));
-                if (x < size_x - 1)
-                    neighbors.push_back(grid2.getElement(y, x + 1));
-                if (y < size_y - 1)
-                    neighbors.push_back(grid2.getElement(y + 1, x));
-                if (x > 0)
-                    neighbors.push_back(grid2.getElement(y, x - 1));
-                neighbors.push_back(grid1.getElement(y, x)); // grid1との接続
-                center->setConnections(neighbors);
+                if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
+                    int cordinated_x = x / 2;
+                    if(x % particles == 1){
+                        unit->setConnections({detection_right.getElement(y, cordinated_x + 1),command_down.getElement(y, x)});
+                    }
+                    else {
+                        unit->setConnections({detection_right.getElement(y, cordinated_x),command_down.getElement(y, x)});
+                    }
+                }
             }
         }
     }
 
     // === 接続情報 ===
-    // command_down
-    std::vector<std::shared_ptr<BaseElement>> neighbors;
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = command_down.getElement(y, x);
-            neighbors.push_back()
-            // elem->setConnections(...);
-        }
-    }
-    for (int y = 1; y < size_y; ++y) {
-        for (int x = 1; x < size_x * particles; ++x) {
-            int particle_id = x % particles;
-            int block_x = x / particles;
-    
-            if (y == 1) {
-                // 最初の行
-                // 例えば:
-                // elem->setConnections({
-                //     (右方向衝突判定grid),
-                //     (命令方向gridの現在セル),
-                //     (左方向衝突判定grid),
-                //     (右方向命令grid),
-                //     (左方向命令grid)
-                // });
+    // 命令方向回路 (command_down, command_up)
+    for (int y = 1; y < command_down.numRows() - 1; ++y) {
+        for (int x = 1; x < command_down.numCols() - 1; ++x) { // xが2倍-2
+            int cordinated_x = x / 2;
+            int cordinated_y = y * 2; 
+            {
+                // command_down
+                auto elem = command_down.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                if(x % particles == 1){ // 奇数インデックス
+                    neighbors.push_back(command_right.getElement(cordinated_y, cordinated_x + 1));
+                    neighbors.push_back(command_left.getElement(cordinated_y, cordinated_x + 1));
+                }
+                else { // 偶数インデックス
+                    neighbors.push_back(command_right.getElement(cordinated_y - 1, cordinated_x));
+                    neighbors.push_back(command_left.getElement(cordinated_y - 1, cordinated_x));
+                }
+                neighbors.push_back(oneway_DtoC_righttodown.getElement(y,x)->getInternalElement(3)); // 右方向衝突判定
+                neighbors.push_back(oneway_command_down.getElement(y - 1,x)->getInternalElement(3)); // 下方向命令の一方通行（前）
+                neighbors.push_back(oneway_command_down.getElement(y,x)->getInternalElement(0)); // 下方向命令の一方通行（次）
+                neighbors.push_back(oneway_CtoD_down.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
+                elem->setConnections(neighbors);
             }
-            else if (y == size_y - 1) {
-                // 最後の行
-                // elem->setConnections(6個)
+            {
+                // command_up
+                auto elem = command_up.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                if(x % particles == 1){ // 奇数インデックス
+                    neighbors.push_back(command_right.getElement(cordinated_y, cordinated_x + 1));
+                    neighbors.push_back(command_left.getElement(cordinated_y, cordinated_x + 1));
+                }
+                else { // 偶数インデックス
+                    neighbors.push_back(command_right.getElement(cordinated_y - 1, cordinated_x));
+                    neighbors.push_back(command_left.getElement(cordinated_y - 1, cordinated_x));
+                }
+                neighbors.push_back(oneway_DtoC_lefttoup.getElement(y,x)->getInternalElement(3)); // 左方向衝突判定
+                neighbors.push_back(oneway_command_up.getElement(y - 1,x)->getInternalElement(3)); // 上方向命令の一方通行（前）
+                neighbors.push_back(oneway_command_up.getElement(y,x)->getInternalElement(0)); // 上方向命令の一方通行（次）
+                neighbors.push_back(oneway_CtoD_up.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
+                elem->setConnections(neighbors);
             }
-            else {
-                // 中間行
-                // elem->setConnections(6個)
+        }
+    }
+    // 命令方向回路(command_left, command_right)
+    for (int y = 1; y < command_left.numRows() - 1; ++y) {
+        for (int x = 1; x < command_left.numCols() - 1; ++x) {
+            int cordinated_x = x * 2;
+            int cordinated_y = y / 2; 
+            {
+                // command_left
+                auto elem = command_left.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                if(y % particles == 1){ // 奇数インデックス
+                    neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x + 1));
+                    neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x + 1));
+                }
+                else { // 偶数インデックス
+                    neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x - 1));
+                    neighbors.push_back(command_down.getElement(cordinated_y - 1, cordinated_x - 1));
+                }
+                neighbors.push_back(oneway_DtoC_downtoleft.getElement(y,x)->getInternalElement(3)); // 下方向衝突判定
+                neighbors.push_back(oneway_command_left.getElement(y - 1,x)->getInternalElement(3)); // 左方向命令の一方通行（前）
+                neighbors.push_back(oneway_command_left.getElement(y,x)->getInternalElement(0)); // 左方向命令の一方通行（次）
+                neighbors.push_back(oneway_CtoD_left.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
+                elem->setConnections(neighbors);
+            }
+            {
+                // command_right
+                auto elem = command_right.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                if(x % particles == 1){ // 奇数インデックス
+                    neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x + 1));
+                    neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x + 1));
+                }
+                else { // 偶数インデックス
+                    neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x - 1));
+                    neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x - 1));
+                }
+                neighbors.push_back(oneway_DtoC_uptoright.getElement(y,x)->getInternalElement(3)); // 右方向衝突判定
+                neighbors.push_back(oneway_command_right.getElement(y - 1,x)->getInternalElement(3)); // 下方向命令の一方通行（前）
+                neighbors.push_back(oneway_command_right.getElement(y,x)->getInternalElement(0)); // 下方向命令の一方通行（次）
+                neighbors.push_back(oneway_CtoD_right.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
+                elem->setConnections(neighbors);
             }
         }
     }
-    
-
-    // detection_down
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = detection_down.getElement(y, x);
-            // elem->setConnections(...);
+    // 衝突判定回路（detection_down, detection_left, detection_up, detection_right）
+    for (int y = 1; y < detection_down.numRows() - 1; ++y) {
+        for (int x = 1; x < detection_down.numCols() - 1; ++x) {
+            int cordinated_x = x * 2;
+            int cordinated_y = y * 2;
+            {
+                // detection_down
+                auto elem = detection_down.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                neighbors.push_back(oneway_CtoD_down.getElement(y, cordinated_x - 1)->getInternalElement(3)); // 命令から衝突まで
+                neighbors.push_back(oneway_CtoD_down.getElement(y, cordinated_x)->getInternalElement(3));
+                neighbors.push_back(oneway_DtoC_downtoleft.getElement(cordinated_y - 1, x)->getInternalElement(0));
+                neighbors.push_back(oneway_DtoC_downtoleft.getElement(cordinated_y, x)->getInternalElement(0));
+                elem->setConnections(neighbors);
+            }
+            {
+                // detection_left
+                auto elem = detection_left.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                neighbors.push_back(oneway_CtoD_left.getElement(cordinated_y - 1, x)->getInternalElement(3)); // 命令から衝突まで
+                neighbors.push_back(oneway_CtoD_left.getElement(cordinated_y, x)->getInternalElement(3));
+                neighbors.push_back(oneway_DtoC_lefttoup.getElement(y, cordinated_x - 1)->getInternalElement(0));
+                neighbors.push_back(oneway_DtoC_lefttoup.getElement(y, cordinated_x)->getInternalElement(0));
+                elem->setConnections(neighbors);
+            }
+            {
+                // detection_up
+                auto elem = detection_up.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                neighbors.push_back(oneway_CtoD_up.getElement(y, cordinated_x - 1)->getInternalElement(3)); // 命令から衝突まで
+                neighbors.push_back(oneway_CtoD_up.getElement(y, cordinated_x)->getInternalElement(3));
+                neighbors.push_back(oneway_DtoC_uptoright.getElement(cordinated_y - 1, x)->getInternalElement(0));
+                neighbors.push_back(oneway_DtoC_uptoright.getElement(cordinated_y, x)->getInternalElement(0));
+                elem->setConnections(neighbors);
+            }
+            {
+                // detection_right
+                auto elem = detection_right.getElement(y, x);
+                std::vector<std::shared_ptr<BaseElement>> neighbors;
+                neighbors.push_back(oneway_CtoD_right.getElement(cordinated_y - 1, x)->getInternalElement(3)); // 命令から衝突まで
+                neighbors.push_back(oneway_CtoD_right.getElement(cordinated_y, x)->getInternalElement(3));
+                neighbors.push_back(oneway_DtoC_righttodown.getElement(y, cordinated_x - 1)->getInternalElement(0));
+                neighbors.push_back(oneway_DtoC_righttodown.getElement(y, cordinated_x)->getInternalElement(0));
+                elem->setConnections(neighbors);
+            }
         }
     }
 
-    // command_left
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = command_left.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // detection_left
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = detection_left.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // command_up
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = command_up.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // detection_up
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = detection_up.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // command_right
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = command_right.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // detection_right
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = detection_right.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_command_down
-    for (int y = 0; y < size_y - 1; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = oneway_command_down.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_CtoD_down
-    for (int y = 0; y < size_y - 1; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = oneway_CtoD_down.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_DtoC_downtoleft
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = oneway_DtoC_downtoleft.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_command_left
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x - 1; ++x) {
-            auto elem = oneway_command_left.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_CtoD_left
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x - 1; ++x) {
-            auto elem = oneway_CtoD_left.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_DtoC_lefttoup
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = oneway_DtoC_lefttoup.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_command_up
-    for (int y = 0; y < size_y - 1; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = oneway_command_up.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_CtoD_up
-    for (int y = 0; y < size_y - 1; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = oneway_CtoD_up.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_DtoC_uptoright
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x; ++x) {
-            auto elem = oneway_DtoC_uptoright.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_command_right
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x - 1; ++x) {
-            auto elem = oneway_command_right.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_CtoD_right
-    for (int y = 0; y < size_y * particles; ++y) {
-        for (int x = 0; x < size_x - 1; ++x) {
-            auto elem = oneway_CtoD_right.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
-    // oneway_DtoC_righttodown
-    for (int y = 0; y < size_y; ++y) {
-        for (int x = 0; x < size_x * particles; ++x) {
-            auto elem = oneway_DtoC_righttodown.getElement(y, x);
-            // elem->setConnections(...);
-        }
-    }
-
+    // バイアス電圧を迷路状に設定
+    setMazeBias(command_down,maze,"down",Vd_seo);
+    setMazeBias(command_left,maze,"left",Vd_seo);
+    setMazeBias(command_up,maze,"up",Vd_seo);
+    setMazeBias(command_right,maze,"right",Vd_seo);
+    setMazeBiasWithDirection(detection_down,maze,"down",Vd_seo);
+    setMazeBiasWithDirection(detection_left,maze,"left",Vd_seo);
+    setMazeBiasWithDirection(detection_up,maze,"up",Vd_seo);
+    setMazeBiasWithDirection(detection_right,maze,"right",Vd_seo);
 
     // === シミュレーション初期化 ===
     Sim sim(dt, endtime);
-    sim.addGrid({grid1, grid2});
+    sim.addGrid({
+        command_down, command_left, command_up, command_right,
+        detection_down, detection_left, detection_up, detection_right,
+        oneway_command_down, oneway_CtoD_down, oneway_DtoC_downtoleft,
+        oneway_command_left, oneway_CtoD_left, oneway_DtoC_lefttoup,
+        oneway_command_up, oneway_CtoD_up, oneway_DtoC_uptoright,
+        oneway_command_right, oneway_CtoD_right, oneway_DtoC_righttodown
+    });
 
     // === 特定素子の出力設定 ===
     auto ofs = std::make_shared<std::ofstream>("../output/multivn.txt");
     std::vector<std::shared_ptr<BaseElement>> targets = {
-        grid1.getElement(15, 15),
-        grid2.getElement(15, 15),
-        grid1.getElement(16, 15),
-        grid2.getElement(16, 15)};
+        command_down.getElement(1, 1),
+        command_down.getElement(2, 1),
+        command_down.getElement(3, 1),
+        command_down.getElement(4, 1)};
     sim.addSelectedElements(ofs, targets);
-    std::vector<std::string> labels = {"g1_1515", "g2_1515", "g1_1615", "g2_1615"};
+    std::vector<std::string> labels = {"down16-1", "down20-1", "down24-1", "down28-1"};
     sim.generateGnuplotScript("../output/multivn.txt", labels);
 
     // === トリガ設定 ===
-    sim.addVoltageTrigger(100, &grid1, 15, 15, 0.006);
+    sim.addVoltageTrigger(100, &command_down, 1, 16, 0.006);
+    sim.addVoltageTrigger(100, &command_down, 1, 24, 0.006);
 
     // === 実行 ===
     sim.run();
