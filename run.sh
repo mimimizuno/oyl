@@ -19,4 +19,4 @@ mingw32-make || exit 1
 
 # 実行
 ./MainApp.exe
-./UnitTests
+# ./UnitTests

@@ -7,6 +7,13 @@
                 "C:/msys64/mingw64/include",
                 "C:/msys64/mingw64/include/opencv4"
             ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "C:/msys64/mingw64/include",
+                    "C:/msys64/mingw64/include/opencv4"
+                ]
+            },
             "defines": [],
             "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
             "cStandard": "c11",
