@@ -26,7 +26,7 @@ constexpr double endtime = 200;
 
 using Grid = Grid2D<BaseElement>;
 using Sim = Simulation2D<BaseElement>;
-// onewayはサイズ統一しちゃった方が楽そう。command_downとか動画化するものだけちゃんとサイズを整える。
+
 int main()
 {
     std::vector<std::vector<int>> maze = {
@@ -40,6 +40,7 @@ int main()
         {0,0,1,0,1,0,1,1,1,1,1,1,1,1,0},
         {0,0,1,0,1,0,0,1,0,1,0,0,0,0,0},
     };
+
     // === Gridを生成 ===
     Grid command_down(size_y, size_x * particles - 2);                    // 命令方向回路（下）
     Grid detection_down(size_y, size_x);                              // 衝突方向回路（下）
@@ -183,7 +184,7 @@ int main()
             }
             {
                 // onway_command_left
-                auto unit = std::make_shared<OnewayUnit>("right");
+                auto unit = std::make_shared<OnewayUnit>("left");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
@@ -231,7 +232,7 @@ int main()
             }
             {
                 // oneway_command_up
-                auto unit = std::make_shared<OnewayUnit>("right");
+                auto unit = std::make_shared<OnewayUnit>("left");
                 std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
                 for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                 unit->setInternalElements(internal_seos);
@@ -347,6 +348,7 @@ int main()
                     neighbors.push_back(command_left.getElement(cordinated_y - 1, cordinated_x));
                 }
                 neighbors.push_back(oneway_DtoC_righttodown.getElement(y,x)->getInternalElement(3)); // 右方向衝突判定
+                // y - 1が怪しい？？？
                 neighbors.push_back(oneway_command_down.getElement(y - 1,x)->getInternalElement(3)); // 下方向命令の一方通行（前）
                 neighbors.push_back(oneway_command_down.getElement(y,x)->getInternalElement(0)); // 下方向命令の一方通行（次）
                 neighbors.push_back(oneway_CtoD_down.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
@@ -485,19 +487,42 @@ int main()
     });
 
     // === 特定素子の出力設定 ===
-    auto ofs = std::make_shared<std::ofstream>("../output/multivn.txt");
-    std::vector<std::shared_ptr<BaseElement>> targets = {
+    auto ofs1 = std::make_shared<std::ofstream>("../output/seos_down.txt");
+    std::vector<std::shared_ptr<BaseElement>> targets1 = {
         command_down.getElement(1, 1),
-        command_down.getElement(2, 1),
-        command_down.getElement(3, 1),
-        command_down.getElement(4, 1)};
-    sim.addSelectedElements(ofs, targets);
-    std::vector<std::string> labels = {"down16-1", "down20-1", "down24-1", "down28-1"};
-    sim.generateGnuplotScript("../output/multivn.txt", labels);
+        command_down.getElement(1, 16),
+        command_down.getElement(1, 20),
+        command_down.getElement(1, 24),
+        command_down.getElement(1, 28)};
+    sim.addSelectedElements(ofs1, targets1);
+    std::vector<std::string> labels1 = {"down1-1", "down1-16", "down1-20", "down1-24", "down1-28"};
+    sim.generateGnuplotScript("../output/seos_down.txt", labels1);
+
+    auto ofs2 = std::make_shared<std::ofstream>("../output/seos_up.txt");
+    std::vector<std::shared_ptr<BaseElement>> targets2 = {
+        command_up.getElement(1, 1),
+        command_up.getElement(1, 16),
+        command_up.getElement(1, 20),
+        command_up.getElement(1, 24),
+        command_up.getElement(1, 28)};
+    sim.addSelectedElements(ofs2, targets2);
+    std::vector<std::string> labels2 = {"up1-1", "up1-16", "up1-20", "up1-24", "up1-28"};
+    sim.generateGnuplotScript("../output/seos_up.txt", labels2);
+
+    auto ofs3 = std::make_shared<std::ofstream>("../output/oneway.txt");
+    std::vector<std::shared_ptr<BaseElement>> targets3 = {
+        oneway_command_down.getElement(1,16)->getInternalElement(0),
+        oneway_command_down.getElement(1,16)->getInternalElement(1),
+        oneway_command_down.getElement(1,16)->getInternalElement(2),
+        oneway_command_down.getElement(1,16)->getInternalElement(3),
+    };
+    sim.addSelectedElements(ofs3, targets3);
+    std::vector<std::string> labels3 = {"oneway-d0", "oneway-d1", "oneway-d2", "oneway-d3"};
+    sim.generateGnuplotScript("../output/oneway.txt", labels3);
 
     // === トリガ設定 ===
-    sim.addVoltageTrigger(100, &command_down, 1, 16, 0.006);
-    sim.addVoltageTrigger(100, &command_down, 1, 24, 0.006);
+    sim.addVoltageTrigger(100, &command_down, 1, 16, 0.0006);
+    sim.addVoltageTrigger(100, &command_down, 1, 24, 0.0006);
 
     // === 実行 ===
     sim.run();

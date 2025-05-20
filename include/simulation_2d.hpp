@@ -74,7 +74,7 @@ public:
     const std::map<std::string, std::vector<std::vector<std::vector<double>>>> &getOutputs() const;
 
     // トリガーを追加する
-    void addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int x, int y, double voltage);
+    void addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int y, int x, double voltage);
 
     // トリガを適用させる
     void applyVoltageTriggers();
@@ -130,6 +130,7 @@ void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
             << ", x=" << x
             << ", y=" << y
             << ", dir=" << tunnelgrid.getTunnelDirection()
+            << ", grid=" << tunnelgrid.getOutputLabel()
             << std::endl;
     }
     //-----------------------------------------------------------------
