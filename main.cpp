@@ -27,6 +27,8 @@ constexpr double endtime = 200;
 using Grid = Grid2D<BaseElement>;
 using Sim = Simulation2D<BaseElement>;
 
+// 対角接続の伝搬を確認する
+
 int main()
 {
     std::vector<std::vector<int>> maze = {
@@ -143,7 +145,7 @@ int main()
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_down.setElement(y, x, unit);
                 if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows() - 1){
-                    unit->setConnections({command_down.getElement(y,x),command_down.getElement(y+1,x)});
+                    unit->setOnewayConnections(command_down.getElement(y,x),command_down.getElement(y+1,x));
                 }
             }
             {
@@ -157,10 +159,10 @@ int main()
                 if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
                     int cordinated_x = x / 2;
                     if(x % particles == 1){
-                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x)});
+                        unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x));
                     }
                     else {
-                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1)});
+                        unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1));
                     }
                 }
             }
@@ -175,10 +177,10 @@ int main()
                 if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
                     int cordinated_y = y / 2;
                     if(y % particles == 1){
-                        unit->setConnections({detection_down.getElement(cordinated_y + 1, x),command_left.getElement(y, x)});
+                        unit->setOnewayConnections(detection_down.getElement(cordinated_y + 1, x),command_left.getElement(y, x));
                     }
                     else {
-                        unit->setConnections({detection_down.getElement(cordinated_y, x),command_left.getElement(y, x)});
+                        unit->setOnewayConnections(detection_down.getElement(cordinated_y, x),command_left.getElement(y, x));
                     }
                 }
             }
@@ -191,7 +193,7 @@ int main()
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_left.setElement(y, x, unit);
                 if(x > 0 && x < command_left.numCols() - 1 && y > 0 && y < command_left.numRows()){
-                    unit->setConnections({command_left.getElement(y,x),command_left.getElement(y,x+1)});
+                    unit->setOnewayConnections(command_left.getElement(y,x),command_left.getElement(y,x+1));
                 }
             }
             {
@@ -205,10 +207,10 @@ int main()
                 if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
                     int cordinated_y = y / 2;
                     if(y % particles == 1){
-                        unit->setConnections({command_left.getElement(y,x),detection_left.getElement(cordinated_y, x)});
+                        unit->setOnewayConnections(command_left.getElement(y,x),detection_left.getElement(cordinated_y, x));
                     }
                     else {
-                        unit->setConnections({command_left.getElement(y,x),detection_left.getElement(cordinated_y + 1, x)});
+                        unit->setOnewayConnections(command_left.getElement(y,x),detection_left.getElement(cordinated_y + 1, x));
                     }
                 }
             }
@@ -223,10 +225,10 @@ int main()
                 if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows()){
                     int cordinated_x = x / 2;
                     if(x % particles == 1){
-                        unit->setConnections({detection_left.getElement(y, cordinated_x + 1),command_up.getElement(y, x)});
+                        unit->setOnewayConnections(detection_left.getElement(y, cordinated_x + 1),command_up.getElement(y, x));
                     }
                     else {
-                        unit->setConnections({detection_left.getElement(y, cordinated_x),command_up.getElement(y, x)});
+                        unit->setOnewayConnections(detection_left.getElement(y, cordinated_x),command_up.getElement(y, x));
                     }
                 }
             }
@@ -239,7 +241,7 @@ int main()
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_up.setElement(y, x, unit);
                 if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows() - 1){
-                    unit->setConnections({command_up.getElement(y,x),command_up.getElement(y + 1,x)});
+                    unit->setOnewayConnections(command_up.getElement(y,x),command_up.getElement(y + 1,x));
                 }
             }
             {
@@ -253,10 +255,10 @@ int main()
                 if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows()){
                     int cordinated_x = x / 2;
                     if(x % particles == 1){
-                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x)});
+                        unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x));
                     }
                     else {
-                        unit->setConnections({command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1)});
+                        unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1));
                     }
                 }
             }
@@ -271,10 +273,10 @@ int main()
                 if(x > 0 && x < command_right.numCols() && y > 0 && y < command_right.numRows()){
                     int cordinated_y = y / 2;
                     if(y % particles == 1){
-                        unit->setConnections({detection_up.getElement(cordinated_y + 1, x),command_right.getElement(y, x)});
+                        unit->setOnewayConnections(detection_up.getElement(cordinated_y + 1, x),command_right.getElement(y, x));
                     }
                     else {
-                        unit->setConnections({detection_up.getElement(cordinated_y, x),command_right.getElement(y, x)});
+                        unit->setOnewayConnections(detection_up.getElement(cordinated_y, x),command_right.getElement(y, x));
                     }
                 }
             }
@@ -287,7 +289,7 @@ int main()
                 unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd_oneway);
                 oneway_command_right.setElement(y, x, unit);
                 if(x > 0 && x < command_right.numCols() - 1 && y > 0 && y < command_right.numRows()){
-                    unit->setConnections({command_right.getElement(y,x),command_right.getElement(y,x + 1)});
+                    unit->setOnewayConnections(command_right.getElement(y,x),command_right.getElement(y,x + 1));
                 }
             }
             {
@@ -301,10 +303,10 @@ int main()
                 if(x > 0 && x < command_right.numCols() && y > 0 && y < command_right.numRows()){
                     int cordinated_y = y / 2;
                     if(y % particles == 1){
-                        unit->setConnections({command_right.getElement(y,x),detection_right.getElement(cordinated_y, x)});
+                        unit->setOnewayConnections(command_right.getElement(y,x),detection_right.getElement(cordinated_y, x));
                     }
                     else {
-                        unit->setConnections({command_right.getElement(y,x),detection_right.getElement(cordinated_y + 1, x)});
+                        unit->setOnewayConnections(command_right.getElement(y,x),detection_right.getElement(cordinated_y + 1, x));
                     }
                 }
             }
@@ -319,10 +321,10 @@ int main()
                 if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
                     int cordinated_x = x / 2;
                     if(x % particles == 1){
-                        unit->setConnections({detection_right.getElement(y, cordinated_x + 1),command_down.getElement(y, x)});
+                        unit->setOnewayConnections(detection_right.getElement(y, cordinated_x + 1),command_down.getElement(y, x));
                     }
                     else {
-                        unit->setConnections({detection_right.getElement(y, cordinated_x),command_down.getElement(y, x)});
+                        unit->setOnewayConnections(detection_right.getElement(y, cordinated_x),command_down.getElement(y, x));
                     }
                 }
             }
@@ -348,7 +350,6 @@ int main()
                     neighbors.push_back(command_left.getElement(cordinated_y - 1, cordinated_x));
                 }
                 neighbors.push_back(oneway_DtoC_righttodown.getElement(y,x)->getInternalElement(3)); // 右方向衝突判定
-                // y - 1が怪しい？？？
                 neighbors.push_back(oneway_command_down.getElement(y - 1,x)->getInternalElement(3)); // 下方向命令の一方通行（前）
                 neighbors.push_back(oneway_command_down.getElement(y,x)->getInternalElement(0)); // 下方向命令の一方通行（次）
                 neighbors.push_back(oneway_CtoD_down.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
