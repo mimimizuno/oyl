@@ -21,11 +21,13 @@ public:
     virtual double getVd() const = 0;
     virtual double getSurroundingVsum() const = 0;
     virtual std::map<std::string, double> getWT() const = 0;
+    // oneway用の中要素を取り出すメソッド（seoやmultiseoで呼び出すとエラーが発生する）
+    virtual std::shared_ptr<BaseElement> getInternalElement(int index) const = 0;
 
     // --- 状態設定 ---
+    virtual void setVias(const double Vd) = 0;
     virtual void setVsum(double V) = 0;
     virtual void setConnections(const std::vector<std::shared_ptr<BaseElement>>& conns) = 0;
-
 
     // --- 計算処理 ---
     virtual void setSurroundingVoltages() = 0;
