@@ -28,6 +28,7 @@ using Grid = Grid2D<BaseElement>;
 using Sim = Simulation2D<BaseElement>;
 
 // 対角接続の伝搬を確認する
+// onewayのx=0, y=0を確認する
 
 int main()
 {
@@ -255,10 +256,10 @@ int main()
                 if(x > 0 && x < command_up.numCols() && y > 0 && y < command_up.numRows()){
                     int cordinated_x = x / 2;
                     if(x % particles == 1){
-                        unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x));
+                        unit->setOnewayConnections(command_up.getElement(y,x),detection_up.getElement(y,cordinated_x));
                     }
                     else {
-                        unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1));
+                        unit->setOnewayConnections(command_up.getElement(y,x),detection_up.getElement(y,cordinated_x + 1));
                     }
                 }
             }
@@ -385,15 +386,15 @@ int main()
                 auto elem = command_left.getElement(y, x);
                 std::vector<std::shared_ptr<BaseElement>> neighbors;
                 if(y % particles == 1){ // 奇数インデックス
-                    neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x + 1));
-                    neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x + 1));
+                    neighbors.push_back(command_up.getElement(cordinated_y + 1, cordinated_x));
+                    neighbors.push_back(command_down.getElement(cordinated_y + 1, cordinated_x));
                 }
                 else { // 偶数インデックス
                     neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x - 1));
-                    neighbors.push_back(command_down.getElement(cordinated_y - 1, cordinated_x - 1));
+                    neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x - 1));
                 }
                 neighbors.push_back(oneway_DtoC_downtoleft.getElement(y,x)->getInternalElement(3)); // 下方向衝突判定
-                neighbors.push_back(oneway_command_left.getElement(y - 1,x)->getInternalElement(3)); // 左方向命令の一方通行（前）
+                neighbors.push_back(oneway_command_left.getElement(y,x - 1)->getInternalElement(3)); // 左方向命令の一方通行（前）
                 neighbors.push_back(oneway_command_left.getElement(y,x)->getInternalElement(0)); // 左方向命令の一方通行（次）
                 neighbors.push_back(oneway_CtoD_left.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
                 elem->setConnections(neighbors);
@@ -402,16 +403,16 @@ int main()
                 // command_right
                 auto elem = command_right.getElement(y, x);
                 std::vector<std::shared_ptr<BaseElement>> neighbors;
-                if(x % particles == 1){ // 奇数インデックス
-                    neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x + 1));
-                    neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x + 1));
+                if(y % particles == 1){ // 奇数インデックス
+                    neighbors.push_back(command_up.getElement(cordinated_y + 1, cordinated_x));
+                    neighbors.push_back(command_down.getElement(cordinated_y + 1, cordinated_x));
                 }
                 else { // 偶数インデックス
                     neighbors.push_back(command_up.getElement(cordinated_y, cordinated_x - 1));
                     neighbors.push_back(command_down.getElement(cordinated_y, cordinated_x - 1));
                 }
                 neighbors.push_back(oneway_DtoC_uptoright.getElement(y,x)->getInternalElement(3)); // 右方向衝突判定
-                neighbors.push_back(oneway_command_right.getElement(y - 1,x)->getInternalElement(3)); // 下方向命令の一方通行（前）
+                neighbors.push_back(oneway_command_right.getElement(y,x - 1)->getInternalElement(3)); // 下方向命令の一方通行（前）
                 neighbors.push_back(oneway_command_right.getElement(y,x)->getInternalElement(0)); // 下方向命令の一方通行（次）
                 neighbors.push_back(oneway_CtoD_right.getElement(y,x)->getInternalElement(0)); // 命令から衝突まで
                 elem->setConnections(neighbors);
@@ -488,42 +489,71 @@ int main()
     });
 
     // === 特定素子の出力設定 ===
-    auto ofs1 = std::make_shared<std::ofstream>("../output/seos_down.txt");
+
+    auto ofs1 = std::make_shared<std::ofstream>("../output/detecleft-53.txt");
     std::vector<std::shared_ptr<BaseElement>> targets1 = {
-        command_down.getElement(1, 1),
-        command_down.getElement(1, 16),
-        command_down.getElement(1, 20),
-        command_down.getElement(1, 24),
-        command_down.getElement(1, 28)};
+        detection_left.getElement(5,3),
+        oneway_CtoD_left.getElement(9,3)->getInternalElement(3),
+        oneway_CtoD_left.getElement(10,3)->getInternalElement(3),
+        oneway_DtoC_lefttoup.getElement(5,5)->getInternalElement(0),
+        oneway_DtoC_lefttoup.getElement(5,6)->getInternalElement(0),};
     sim.addSelectedElements(ofs1, targets1);
-    std::vector<std::string> labels1 = {"down1-1", "down1-16", "down1-20", "down1-24", "down1-28"};
-    sim.generateGnuplotScript("../output/seos_down.txt", labels1);
+    std::vector<std::string> labels1 = {"detec5,3", "CtoD9,3", "CtoD10,3", "DtoC5,5", "DtoC5,6"};
+    sim.generateGnuplotScript("../output/detecleft-53.txt", labels1);
 
-    auto ofs2 = std::make_shared<std::ofstream>("../output/seos_up.txt");
+    auto ofs2 = std::make_shared<std::ofstream>("../output/detecleft-55.txt");
     std::vector<std::shared_ptr<BaseElement>> targets2 = {
-        command_up.getElement(1, 1),
-        command_up.getElement(1, 16),
-        command_up.getElement(1, 20),
-        command_up.getElement(1, 24),
-        command_up.getElement(1, 28)};
+        detection_left.getElement(5,5),
+        oneway_CtoD_left.getElement(9,5)->getInternalElement(3),
+        oneway_CtoD_left.getElement(10,5)->getInternalElement(3),
+        oneway_DtoC_lefttoup.getElement(5,9)->getInternalElement(0),
+        oneway_DtoC_lefttoup.getElement(5,10)->getInternalElement(0),};
     sim.addSelectedElements(ofs2, targets2);
-    std::vector<std::string> labels2 = {"up1-1", "up1-16", "up1-20", "up1-24", "up1-28"};
-    sim.generateGnuplotScript("../output/seos_up.txt", labels2);
+    std::vector<std::string> labels2 = {"detec5,5", "CtoD9,5", "CtoD10,5", "DtoC5,9", "DtoC5,10"};
+    sim.generateGnuplotScript("../output/detecleft-55.txt", labels2);
 
-    auto ofs3 = std::make_shared<std::ofstream>("../output/oneway.txt");
+    auto ofs3 = std::make_shared<std::ofstream>("../output/left9-3_neighbors.txt");
     std::vector<std::shared_ptr<BaseElement>> targets3 = {
-        oneway_command_down.getElement(1,16)->getInternalElement(0),
-        oneway_command_down.getElement(1,16)->getInternalElement(1),
-        oneway_command_down.getElement(1,16)->getInternalElement(2),
-        oneway_command_down.getElement(1,16)->getInternalElement(3),
+        command_left.getElement(9,3),
+        command_left.getElement(9, 5),
+        command_up.getElement(5, 6),
+        command_down.getElement(5, 6),
+        oneway_DtoC_downtoleft.getElement(9,3)->getInternalElement(3),
+        oneway_command_left.getElement(9,2)->getInternalElement(3),
+        oneway_command_left.getElement(9,3)->getInternalElement(0),
+        oneway_CtoD_left.getElement(9,3)->getInternalElement(0),
     };
     sim.addSelectedElements(ofs3, targets3);
-    std::vector<std::string> labels3 = {"oneway-d0", "oneway-d1", "oneway-d2", "oneway-d3"};
-    sim.generateGnuplotScript("../output/oneway.txt", labels3);
+    std::vector<std::string> labels3 = {"left9-3","left9-5", "c-up", "c-down", "OnewayDownToLeft", "OnewayComLeft-before","OnewayComLeft-after","CtoDLeft"};
+    sim.generateGnuplotScript("../output/left9-3_neighbors.txt", labels3);
+    // auto ofs2 = std::make_shared<std::ofstream>("../output/up116_neighbors.txt");
+    // std::vector<std::shared_ptr<BaseElement>> targets2 = {
+    //     command_up.getElement(1, 16),
+    //     command_right.getElement(1, 8),
+    //     command_left.getElement(1,8),
+    //     oneway_DtoC_lefttoup.getElement(1,16)->getInternalElement(3),
+    //     oneway_command_up.getElement(0,16)->getInternalElement(3),
+    //     oneway_command_up.getElement(1,16)->getInternalElement(0),
+    //     oneway_CtoD_up.getElement(1,16)->getInternalElement(0),
+    // };
+    // sim.addSelectedElements(ofs2, targets2);
+    // std::vector<std::string> labels2 = {"up1-16", "c-right", "c-left", "OnewayLeftToUp", "OnewayComUp-before","OnewayComUp-after","CtoDUp"};
+    // sim.generateGnuplotScript("../output/up116_neighbors.txt", labels2);
+
+    // auto ofs3 = std::make_shared<std::ofstream>("../output/oneway.txt");
+    // std::vector<std::shared_ptr<BaseElement>> targets3 = {
+    //     oneway_command_down.getElement(1,16)->getInternalElement(0),
+    //     oneway_command_down.getElement(1,16)->getInternalElement(1),
+    //     oneway_command_down.getElement(1,16)->getInternalElement(2),
+    //     oneway_command_down.getElement(1,16)->getInternalElement(3),
+    // };
+    // sim.addSelectedElements(ofs3, targets3);
+    // std::vector<std::string> labels3 = {"oneway-d0", "oneway-d1", "oneway-d2", "oneway-d3"};
+    // sim.generateGnuplotScript("../output/oneway.txt", labels3);
 
     // === トリガ設定 ===
-    sim.addVoltageTrigger(100, &command_down, 1, 16, 0.0006);
-    sim.addVoltageTrigger(100, &command_down, 1, 24, 0.0006);
+    sim.addVoltageTrigger(100, &command_down, 1, 15, 0.0006);
+    sim.addVoltageTrigger(100, &command_down, 1, 20, 0.0006);
 
     // === 実行 ===
     sim.run();
