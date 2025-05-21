@@ -86,9 +86,9 @@ void setMazeBias(Grid2D<Element>& grid, const std::vector<std::vector<int>>& maz
     }
 }
 
-
-// 衝突判定回路にバイアス電圧を設定する関数
 // 与えられた迷路ベクトルの0（壁）1（通路)を読み取ってgridの要素にVdを設定。上下左右の方向を読み取り、障害物の１マス手前を低めの値で設定する関数
+// 衝突判定回路にバイアス電圧を設定する関数
+// 壁の1マス手前にVd_normal、2マス手前にVd_lowerを設定
 template<typename Element>
 void setMazeBiasWithDirection(
     Grid2D<Element>& grid,
@@ -108,47 +108,39 @@ void setMazeBiasWithDirection(
         throw std::invalid_argument("Maze size must match grid size - 2.");
     }
 
-    // まずすべてを壁に初期化（0V）
+    // まずすべてを壁に初期化
     for (int y = 0; y < rows; ++y)
         for (int x = 0; x < cols; ++x)
             grid.getElement(y, x)->setVias(Vd_wall);
 
-    // 各障害物に対して、その隣と次のマスを処理
-    for (int my = 0; my < static_cast<int>(maze.size()); ++my) {
-        for (int mx = 0; mx < static_cast<int>(maze[0].size()); ++mx) {
-            if (maze[my][mx] != 0) continue; // 障害物のみ対象
+    for (int y = 1; y < rows - 1; ++y) {
+        for (int x = 1; x < cols - 1; ++x) {
+            int maze_y = y - 1;
+            int maze_x = x - 1;
 
-            int gx = mx + 1; // grid座標系
-            int gy = my + 1;
+            if (maze[maze_y][maze_x] != 1) continue; // 通路だけ対象
 
-            auto set_if_passage = [&](int y, int x, double value) {
-                if (y <= 0 || y >= rows - 1 || x <= 0 || x >= cols - 1) return;
-                if (maze[y - 1][x - 1] == 1) { // mazeで通路であることを確認
-                    grid.getElement(y, x)->setVias(value);
-                }
-            };
-
-            if (direction == "left") {
-                set_if_passage(gy, gx + 1, Vd_normal);
-                set_if_passage(gy, gx + 2, Vd_lower);
-            }
-            else if (direction == "right") {
-                set_if_passage(gy, gx - 1, Vd_normal);
-                set_if_passage(gy, gx - 2, Vd_lower);
-            }
-            else if (direction == "up") {
-                set_if_passage(gy + 1, gx, Vd_normal);
-                set_if_passage(gy + 2, gx, Vd_lower);
-            }
-            else if (direction == "down") {
-                set_if_passage(gy - 1, gx, Vd_normal);
-                set_if_passage(gy - 2, gx, Vd_lower);
-            }
-            else {
-                throw std::invalid_argument("Invalid direction: must be 'up', 'down', 'left', or 'right'.");
+            bool hasWall = false;
+            if (direction == "up" && maze_y > 0 && maze[maze_y - 1][maze_x] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (y + 1 < rows - 1 && maze[maze_y + 1][maze_x] == 1) grid.getElement(y + 1, x)->setVias(Vd_lower);
+            } else if (direction == "down" && maze_y < maze.size() - 1 && maze[maze_y + 1][maze_x] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (y - 1 > 0 && maze[maze_y - 1][maze_x] == 1) grid.getElement(y - 1, x)->setVias(Vd_lower);
+            } else if (direction == "left" && maze_x > 0 && maze[maze_y][maze_x - 1] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (x + 1 < cols - 1 && maze[maze_y][maze_x + 1] == 1) grid.getElement(y, x + 1)->setVias(Vd_lower);
+            } else if (direction == "right" && maze_x < maze[0].size() - 1 && maze[maze_y][maze_x + 1] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (x - 1 > 0 && maze[maze_y][maze_x - 1] == 1) grid.getElement(y, x - 1)->setVias(Vd_lower);
             }
         }
     }
 }
+
 
 #endif // PARTICLE_COMPUTATION_METHODS_HPP

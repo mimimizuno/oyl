@@ -79,9 +79,9 @@ int main()
 
     // トリガ
     // 左側
-    // sim.addVoltageTrigger(100, &seo, 1, 1, 0.004);
+    sim.addVoltageTrigger(100, &seo, 1, 1, 0.004);
     // 右側
-    sim.addVoltageTrigger(100, &seo, 1, 2, 0.004);
+    // sim.addVoltageTrigger(100, &seo, 1, 2, 0.004);
 
     // 出力ファイル設定
     auto ofs = std::make_shared<std::ofstream>("../output/oneway_vn.txt");
