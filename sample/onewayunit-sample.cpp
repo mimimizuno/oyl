@@ -14,17 +14,17 @@
 constexpr double R = 0.5;
 constexpr double Rj = 0.002;
 constexpr double C = 2.0;
-constexpr double Vd = 0.0044;
+constexpr double Vd = 0.0039;
 constexpr double dt = 0.1;
-constexpr double endtime = 100;
+constexpr double endtime = 200;
 
 using Grid = Grid2D<BaseElement>;
 using Sim = Simulation2D<BaseElement>;
 
 int main()
 {
-    Grid grid(3, 3, true); // 境界対策で3x3、中央を使用
-    grid.setOutputLabel("oneway");
+    Grid seo(3,3,false);
+    Grid grid(3, 3, false);
 
     // 内部SEOを初期化して設定
     std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
@@ -41,14 +41,20 @@ int main()
     // SEOの内部素子取得（再取得）
     const auto& internals = unit->getInternalElements();
 
-    // dummy接続SEOを生成して grid に登録
+    // dummy接続SEOを生成して seo に登録
     auto dummy_left = std::make_shared<SEO>();
-    dummy_left->setUp(R, Rj, C, C, 0.0, 1);
-    grid.setElement(1, 0, dummy_left); // ← gridに配置
+    dummy_left->setUp(R, Rj, Cj_leg4, C, Vd, 4);
+    std::vector<std::shared_ptr<BaseElement>> neighbor_left;
+    neighbor_left.push_back(internal_seos[0]); 
+    dummy_left->setConnections(neighbor_left);
+    seo.setElement(1, 1, dummy_left);
 
     auto dummy_right = std::make_shared<SEO>();
-    dummy_right->setUp(R, Rj, C, C, 0.0, 1);
-    grid.setElement(1, 2, dummy_right); // ← gridに配置
+    dummy_right->setUp(R, Rj, Cj_leg4, C, Vd, 4);
+    std::vector<std::shared_ptr<BaseElement>> neighbor_right;
+    neighbor_right.push_back(internal_seos[0]); 
+    dummy_right->setConnections(neighbor_right);
+    seo.setElement(1, 2, dummy_right);
 
     unit->setOnewayConnections(dummy_left, dummy_right);
 
@@ -61,18 +67,21 @@ int main()
             if (!grid.getElement(y, x)) {
                 grid.setElement(y, x, std::make_shared<SEO>());
             }
+            if(!seo.getElement(y,x)){
+                seo.setElement(y,x,std::make_shared<SEO>());
+            }
         }
     }
 
     // シミュレーション準備
     Sim sim(dt, endtime);
-    sim.addGrid({grid});
+    sim.addGrid({grid, seo});
 
-    // トリガ：素子0に -0.006V を印加
-    internals[0]->setVsum(internals[0]->getSurroundingVsum() - 0.006);
-
-    // トリガ：t = 100 で dummy_left に +0.006V を印加
-    sim.addVoltageTrigger(100, &grid, 1, 0, 0.006); // dummy_left は (1,0)
+    // トリガ
+    // 左側
+    sim.addVoltageTrigger(100, &seo, 1, 1, 0.004);
+    // 右側
+    // sim.addVoltageTrigger(100, &seo, 1, 2, 0.004);
 
     // 出力ファイル設定
     auto ofs = std::make_shared<std::ofstream>("../output/oneway_vn.txt");

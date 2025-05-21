@@ -41,7 +41,7 @@ public:
     void setUp(double r, double rj, double cj, double c, double vd, int legscounts, int junction_num);
 
     // バイアス電圧を設定
-    void setVias(const double vd);
+    void setVias(const double vd) override;
 
     // V_sumを設定
     void setVsum(double v) override;
@@ -86,6 +86,8 @@ public:
     // Vdの取得
     double getVd() const override;
 
+    // oneway用の関数のため呼び出すとエラー発生
+    std::shared_ptr<BaseElement> getInternalElement(int index) const override;
     //-------- 汎用処理 -------------//
     // 0から1の間の乱数を生成
     double Random();

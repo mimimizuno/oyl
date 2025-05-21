@@ -74,7 +74,7 @@ public:
     const std::map<std::string, std::vector<std::vector<std::vector<double>>>> &getOutputs() const;
 
     // トリガーを追加する
-    void addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int x, int y, double voltage);
+    void addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int y, int x, double voltage);
 
     // トリガを適用させる
     void applyVoltageTriggers();
@@ -87,6 +87,9 @@ public:
 
     // gnuplot用データ出力
     void generateGnuplotScript(const std::string& dataFilename, const std::vector<std::string>& labels);
+
+    // 実行中の進捗状況を表示する
+    void printProgressBar();
 };
 
 // コンストラクタ
@@ -130,6 +133,7 @@ void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
             << ", x=" << x
             << ", y=" << y
             << ", dir=" << tunnelgrid.getTunnelDirection()
+            << ", grid=" << tunnelgrid.getOutputLabel()
             << std::endl;
     }
     //-----------------------------------------------------------------
@@ -330,14 +334,11 @@ void Simulation2D<Element>::addGrid(const std::vector<Grid2D<Element>> &Gridinst
 template <typename Element>
 void Simulation2D<Element>::run()
 {
-    // openFiles();
-    // トンネルの場所を記録するファイルの出力（別関数にする予定）
-
     while (t < endtime)
     {
         runStep();
+        printProgressBar();
     }
-    // closeFiles();
 }
 
 // グリッド取得
@@ -354,14 +355,14 @@ const std::map<std::string, std::vector<std::vector<std::vector<double>>>> &Simu
 }
 
 template <typename Element>
-void Simulation2D<Element>::addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int x, int y, double voltage) {
-    voltageTriggers.emplace_back(grid, triggerTime, x, y, voltage);
+void Simulation2D<Element>::addVoltageTrigger(double triggerTime, Grid2D<Element>* grid, int y, int x, double voltage) {
+    voltageTriggers.emplace_back(grid, triggerTime, y, x, voltage);
 }
 
 template <typename Element>
 void Simulation2D<Element>::applyVoltageTriggers()
 {
-    for (const auto& [gridPtr, triggerTime, x, y, voltage] : voltageTriggers) {
+    for (const auto& [gridPtr, triggerTime, y, x, voltage] : voltageTriggers) {
         if (t >= triggerTime && t < triggerTime + dt * 10) {
             if (!gridPtr) {
                 throw std::invalid_argument("Trigger references a null grid pointer.");
@@ -414,6 +415,26 @@ void Simulation2D<Element>::generateGnuplotScript(const std::string& dataFilenam
     gnuFile << "\n";
 
     std::cout << "[INFO] Gnuplot script generated: " << scriptFilename << std::endl;
+}
+
+// 実行中の進捗状況を表示する
+template <typename Element>
+void Simulation2D<Element>::printProgressBar(){
+    static int last_stage = -1;
+    int stage = static_cast<int>((t / endtime) * 10);  // 0〜10（10%刻み）
+
+    if (stage != last_stage) {
+        last_stage = stage;
+        int percent = stage * 10;
+
+        std::string bar = "[";
+        for (int i = 0; i < 10; ++i)
+            bar += (i < stage) ? "=" : " ";
+        bar += "]";
+
+        std::cout << "[INFO] Simulation progress: " << bar
+                  << " " << percent << "%" << std::endl;
+    }
 }
 
 #endif // SIMULATION_2D_HPP

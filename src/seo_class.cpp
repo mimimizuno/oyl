@@ -130,12 +130,6 @@ double SEO::getVn() const
     return Vn;
 }
 
-// // 接続されてる振動子を取得
-// std::vector<shared_ptr<SEO>> SEO::getConnection() const
-// {
-//     return connections;
-// }
-
 // 接続されてる振動子の電圧の総和を取得
 double SEO::getSurroundingVsum() const
 {
@@ -158,6 +152,12 @@ double SEO::getQ() const
 std::map<std::string, double> SEO::getWT() const
 {
     return wt;
+}
+
+// oneway用の関数のため呼び出すとエラー発生
+std::shared_ptr<BaseElement> SEO::getInternalElement(int index) const 
+{
+    throw std::runtime_error("This element does not have internal elements.");
 }
 
 //-------- 汎用処理 -------------//
