@@ -1,8 +1,19 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
-// 定数を本ヘッダファイルにまとめておく
+#include <cmath>
+// 定数をまとめておくファイル
 
 constexpr double e = 0.1602;     // 電荷量
+constexpr int leg1 = 1;          // 足の数の定義
+constexpr int leg2 = 2;
+constexpr int leg3 = 3;
+constexpr int leg4 = 4;
+constexpr int leg5 = 5;
+constexpr int leg6 = 6;
+constexpr int leg7 = 7;
+constexpr int leg8 = 8;
+constexpr int leg9 = 9;
+constexpr int leg10 = 10;
 constexpr double Cj_leg1 = 18.0; // 足1振動子のトンネル容量[aF]
 constexpr double Cj_leg2 = 16.0; // 足2振動子のトンネル容量[aF]
 constexpr double Cj_leg3 = 14.0; // 足3振動子のトンネル容量[aF]
@@ -11,4 +22,20 @@ constexpr double Cj_leg5 = 10.0; // 足5振動子のトンネル容量[aF]
 constexpr double Cj_leg6 = 8.0;  // 足6振動子のトンネル容量[aF]
 constexpr double multi_Cj = 390; // 20重振動子のトンネル容量[aF]
 
-#endif                           // CONSTANTS_HPP
+// 閾値電圧に合わせて、多重数、足の数、接合容量から振動子のCjの値を返す関数
+inline int seo_junction_cj_calc(int leg, double C, double Vth){
+    return static_cast<int>(e / (2 * Vth)) - leg * C;
+}
+
+// 閾値電圧に合わせて、多重数、足の数、接合容量から多重振動子のCjの値を返す関数(sample参照)
+inline int multi_junction_cj_calc(int multi_junction_num, int leg, double C, double Vth){
+    double Cj_first;
+    double formula_item_a = 2 * Vth;
+    double formula_item_b = 2 * Vth * leg * multi_junction_num * C - multi_junction_num * e;
+    double formula_item_c = - multi_junction_num * e * leg * (multi_junction_num - 1) * C;
+    double contens_in_root = pow(formula_item_b, 2.0) - 4 * formula_item_a * formula_item_c; 
+    Cj_first = (-formula_item_b + pow(contens_in_root, 0.5)) / (2 * formula_item_a);
+    return Cj_first;
+}
+
+#endif // CONSTANTS_HPP
