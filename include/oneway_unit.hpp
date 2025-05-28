@@ -23,21 +23,21 @@ private:
     std::string tunnel_direction = "none";             // トンネルの方向を保持
 
 public:
-    // コンストラクタ：一方通行の向きと4つの素子を初期化（デフォルトは右向き。左向きにしたい場合は引数にleftを指定）
-    OnewayUnit(std::string onewaydirection = "right") : oneway_direction(onewaydirection)
+    // コンストラクタ：一方通行の向きと4つの素子を初期化（デフォルトは0から3。3から0にしたい場合は引数にreverseを指定）
+    OnewayUnit(std::string onewaydirection = "default") : oneway_direction(onewaydirection)
     {
-        if (onewaydirection != "left" && onewaydirection != "right")
+        if (onewaydirection != "default" && onewaydirection != "reverse")
         {
-            throw std::invalid_argument("OnewayUnit: direction must be \"left\" or \"right\"");
+            throw std::invalid_argument("OnewayUnit: direction must be \"default\" or \"reverse\"");
         }
     }
 
     // onway_directionの設定
     void setOnewayDirection(const std::string &onewaydirection)
     {
-        if (onewaydirection != "left" && onewaydirection != "right")
+        if (onewaydirection != "default" && onewaydirection != "reverse")
         {
-            throw std::invalid_argument("direction must be \"left\" or \"right\"");
+            throw std::invalid_argument("direction must be \"default\" or \"reverse\"");
         }
         oneway_direction = onewaydirection;
     }
@@ -64,7 +64,7 @@ public:
                 ptr->setUp(r, rj, cj_leg2, c, vd, 2);
             }
         }
-        if (oneway_direction == "right")
+        if (oneway_direction == "default")
             std::dynamic_pointer_cast<SEO>(ows[3])->setVias(vias);
         else
             std::dynamic_pointer_cast<SEO>(ows[0])->setVias(vias);
@@ -87,7 +87,7 @@ public:
                 ptr->setUp(r, rj, cj_leg2, c, vd, 2, junction_num);
             }
         }
-        if (oneway_direction == "right")
+        if (oneway_direction == "default")
             std::dynamic_pointer_cast<MultiSEO>(ows[3])->setVias(vias);
         else
             std::dynamic_pointer_cast<MultiSEO>(ows[0])->setVias(vias);
