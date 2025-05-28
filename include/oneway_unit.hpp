@@ -17,27 +17,27 @@
 class OnewayUnit : public BaseElement
 {
 private:
-    std::array<std::shared_ptr<BaseElement>, 4> ows; // 一方通行のための4つの素子を用意
+    std::array<std::shared_ptr<BaseElement>, 4> ows;   // 一方通行のための4つの素子を用意
     std::string oneway_direction;                      // 一方通行の方向("left"3から0の方向,"right"0から3の方向)
     std::shared_ptr<BaseElement> locate = nullptr;     // 最小wtを持つ素子
-    std::string tunnel_direction = "none";            // トンネルの方向を保持
+    std::string tunnel_direction = "none";             // トンネルの方向を保持
 
 public:
-    // コンストラクタ：一方通行の向きと4つの素子を初期化（デフォルトは右向き。左向きにしたい場合は引数にleftを指定）
-    OnewayUnit(std::string onewaydirection = "right") : oneway_direction(onewaydirection)
+    // コンストラクタ：一方通行の向きと4つの素子を初期化（デフォルトは0から3。3から0にしたい場合は引数にreverseを指定）
+    OnewayUnit(std::string onewaydirection = "default") : oneway_direction(onewaydirection)
     {
-        if (onewaydirection != "left" && onewaydirection != "right")
+        if (onewaydirection != "default" && onewaydirection != "reverse")
         {
-            throw std::invalid_argument("OnewayUnit: direction must be \"left\" or \"right\"");
+            throw std::invalid_argument("OnewayUnit: direction must be \"default\" or \"reverse\"");
         }
     }
 
     // onway_directionの設定
     void setOnewayDirection(const std::string &onewaydirection)
     {
-        if (onewaydirection != "left" && onewaydirection != "right")
+        if (onewaydirection != "default" && onewaydirection != "reverse")
         {
-            throw std::invalid_argument("direction must be \"left\" or \"right\"");
+            throw std::invalid_argument("direction must be \"default\" or \"reverse\"");
         }
         oneway_direction = onewaydirection;
     }
@@ -64,16 +64,17 @@ public:
                 ptr->setUp(r, rj, cj_leg2, c, vd, 2);
             }
         }
-        if (oneway_direction == "right")
+        if (oneway_direction == "default")
             std::dynamic_pointer_cast<SEO>(ows[3])->setVias(vias);
         else
             std::dynamic_pointer_cast<SEO>(ows[0])->setVias(vias);
     }
 
     // 一方通行の中身の素子(multiseo)にパラメータを付与(R,Rj,Cj_leg2,Cj_leg3,C,Vd,multi_num)
-    void setOnewayMultiSeoParam(double r, double rj, double cj_leg2, double cj_leg3, double c, double vd, int junction_num)
+    void setOnewayMultiSeoParam(double r, double rj, double cj_leg2, double cj_leg3, double c, double vd, int junction_num, double ratio = 0.8)
     {
-        double vias = -vd + ((c * e) / ((3 * c + cj_leg3) * (2 * c + cj_leg2)));
+        // ratio * ((e * multi_num * multi_num * Cs) / ((myleg * multi_num * Cs + myCjs) * (myleg * multi_num * Cs + yourCjs)));
+        double vias = -vd + ((c * junction_num * junction_num * e) / ((leg3 * junction_num * c + cj_leg3) * (leg3 * junction_num * c + cj_leg2)));
         for (int i = 0; i < 4; i++)
         {
             auto ptr = std::dynamic_pointer_cast<MultiSEO>(ows[i]);
@@ -86,7 +87,7 @@ public:
                 ptr->setUp(r, rj, cj_leg2, c, vd, 2, junction_num);
             }
         }
-        if (oneway_direction == "right")
+        if (oneway_direction == "default")
             std::dynamic_pointer_cast<MultiSEO>(ows[3])->setVias(vias);
         else
             std::dynamic_pointer_cast<MultiSEO>(ows[0])->setVias(vias);
