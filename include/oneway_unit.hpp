@@ -17,10 +17,10 @@
 class OnewayUnit : public BaseElement
 {
 private:
-    std::array<std::shared_ptr<BaseElement>, 4> ows; // 一方通行のための4つの素子を用意
+    std::array<std::shared_ptr<BaseElement>, 4> ows;   // 一方通行のための4つの素子を用意
     std::string oneway_direction;                      // 一方通行の方向("left"3から0の方向,"right"0から3の方向)
     std::shared_ptr<BaseElement> locate = nullptr;     // 最小wtを持つ素子
-    std::string tunnel_direction = "none";            // トンネルの方向を保持
+    std::string tunnel_direction = "none";             // トンネルの方向を保持
 
 public:
     // コンストラクタ：一方通行の向きと4つの素子を初期化（デフォルトは右向き。左向きにしたい場合は引数にleftを指定）
