@@ -34,7 +34,10 @@ int main()
     }
 
     // OnewayUnitを生成して中央に配置
-    auto unit = std::make_shared<OnewayUnit>("right");
+    // 順方向
+    auto unit = std::make_shared<OnewayUnit>();
+    // 逆方向
+    // auto unit = std::make_shared<OnewayUnit>("reverse");
     unit->setInternalElements(internal_seos);
     unit->setOnewaySeoParam(R, Rj, Cj_leg2, Cj_leg3, C, Vd);
 

@@ -76,13 +76,13 @@ void MEMORY::setSurroundingVoltages()
     }
 }
 
-// 振動子のパラメータ計算
+// メモリのパラメータ計算
 void MEMORY::setPcalc()
 {
     Vn = (Cj * e * ( 2 * upper_electrons + lower_electrons) + 2 * Cj * CL * Vd + 2 * C * Cj * V_sum) / (Cj * (2 * legs * C + Cj + 2 * CL));
 }
 
-// 振動子のエネルギー計算
+// メモリのエネルギー計算
 void MEMORY::setdEcalc()
 {
     dE["up1"] = -e * (CL * e * (1 + 2 * lower_electrons) + Cj * (e + 2 * e * (lower_electrons + upper_electrons) + 2 * CL * Vd) + C * (legs * e + 2 * legs * e * lower_electrons + 2 * Cj * V_sum)) / (2 * Cj * (2 * legs * C + Cj + 2 * CL)); // lower_electrons + 1
@@ -91,10 +91,11 @@ void MEMORY::setdEcalc()
     dE["down2"] = -e * (CL * e * (1 - 2 * lower_electrons) + Cj * (e - 2 * e * (lower_electrons + upper_electrons) - 2 * CL * Vd) + C * (legs * e - 2 * legs * e * lower_electrons - 2 * Cj * V_sum)) / (2 * Cj * (2 * legs * C + Cj + 2 * CL)); // lower_electrons - 1
 }
 
-// // 電荷の更新
-// void MEMORY::setNodeCharge(const double dt)
-// {
-// }
+// 電荷の更新(メモリは電荷の更新を持たないため、呼び出すとエラー)
+void MEMORY::setNodeCharge(const double dt)
+{
+    throw std::runtime_error("This element does not have setNodeCharge function");
+}
 
 // トンネル待ち時間計算(up1, up2, down1, down2のいずれかが正の時にwtを計算してtrueを返す)
 bool MEMORY::calculateTunnelWt()
@@ -147,10 +148,6 @@ void MEMORY::setTunnel(const std::string& direction)
     else if (direction == "down2")
     {
         lower_electrons--;
-    }
-    else
-    {
-        throw std::invalid_argument("Invalid tunnel direction");
     }
 }
 //-----------ゲッター------------//
