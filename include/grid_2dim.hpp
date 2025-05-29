@@ -28,9 +28,12 @@ private:
     double minwt;
     // 出力するかのbool値(デフォルトがtrueで出力する)
     bool outputEnabled;
+    // メモリとして計算処理をするかどうか（デフォルトはfalse、trueの場合はメモリとして計算する）
+    bool isMemory;
 public:
     // コンストラクタ：指定した行数・列数でグリッドを初期化
-    Grid2D(int rows, int cols, bool enableOutput = true); // ← outputするかどうかのbool。デフォルトをtrueにする
+    // enableOutputで動画化するかどうか、isMemoryでメモリとして扱うかどうか
+    Grid2D(int rows, int cols, bool enableOutput = true, bool ismemory = false);
 
     // 指定位置の要素を取得
     std::shared_ptr<Element> getElement(int row, int col) const;
@@ -92,9 +95,9 @@ public:
 
 // コンストラクタ：全要素をmake_sharedで初期化
 template <typename Element>
-Grid2D<Element>::Grid2D(int rows, int cols, bool enableOutput)
+Grid2D<Element>::Grid2D(int rows, int cols, bool enableOutput, bool ismemory)
     : rows_(rows), cols_(cols), grid(rows, std::vector<std::shared_ptr<Element>>(cols)),
-      outputEnabled(enableOutput)
+      outputEnabled(enableOutput), isMemory(ismemory)
 {
     if (rows <= 0 || cols <= 0)
     {
@@ -164,7 +167,8 @@ bool Grid2D<Element>::gridminwt(const double dt)
     {
         for (auto &elem : row)
         {
-            if (elem->calculateTunnelWt())
+            // メモリ以外
+            if (!isMemory && elem->calculateTunnelWt())
             {
                 // up方向かdown方向で値を持っている方をtmpwtに代入
                 double tmpwt = std::max(elem->getWT()["up"], elem->getWT()["down"]);
@@ -173,6 +177,33 @@ bool Grid2D<Element>::gridminwt(const double dt)
                     tunneldirection = (tmpwt == elem->getWT()["up"]) ? "up" : "down";
                     tunnelplace = elem;
                     minwt = std::min(minwt, tmpwt);
+                }
+            }
+            // メモリの処理
+            if (isMemory && elem->calculateTunnelWt())
+            {
+                double tmpwt = 0.0;
+                std::string direction = "";
+
+                if (elem->getWT()["up1"] > 0) {
+                    tmpwt = elem->getWT()["up1"];
+                    direction = "up1";
+                } else if (elem->getWT()["up2"] > 0) {
+                    tmpwt = elem->getWT()["up2"];
+                    direction = "up2";
+                } else if (elem->getWT()["down1"] > 0) {
+                    tmpwt = elem->getWT()["down1"];
+                    direction = "down1";
+                } else if (elem->getWT()["down2"] > 0) {
+                    tmpwt = elem->getWT()["down2"];
+                    direction = "down2";
+                }
+
+                // tmpwtがminwtよりも小さい時にminwtを更新
+                if (tmpwt < minwt) {
+                    tunneldirection = direction;
+                    tunnelplace = elem;
+                    minwt = tmpwt;
                 }
             }
         }
@@ -184,11 +215,14 @@ bool Grid2D<Element>::gridminwt(const double dt)
 template <typename Element>
 void Grid2D<Element>::updateGridQn(const double dt)
 {
-    for (auto &row : grid)
-    {
-        for (auto &elem : row)
+    // メモリ以外の素子を更新
+    if(!isMemory){
+        for (auto &row : grid)
         {
-            elem->setNodeCharge(dt);
+            for (auto &elem : row)
+            {
+                elem->setNodeCharge(dt);
+            }
         }
     }
 }

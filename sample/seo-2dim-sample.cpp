@@ -34,7 +34,7 @@ int main()
         {
             auto seo = std::make_shared<SEO>();
             double biasVd = ((x + y) % 2 == 0) ? Vd : -Vd;
-            seo->setUp(R, Rj, Cj, C, biasVd, 4);
+            seo->setUp(R, Rj, Cj, C, biasVd, leg4);
             grid.setElement(y, x, seo);
         }
     }

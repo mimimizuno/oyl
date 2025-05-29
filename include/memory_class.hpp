@@ -1,5 +1,5 @@
-#ifndef SEO_CLASS_HPP
-#define SEO_CLASS_HPP
+#ifndef MEMORY_CLASS_HPP
+#define MEMORY_CLASS_HPP
 
 #include <iostream>
 #include <vector>
@@ -12,41 +12,39 @@
 #include "base_element.hpp"
 #include "constants.hpp"
 
-class SEO : public BaseElement {
+class MEMORY : public BaseElement {
 private:
-    double Q;               // ノード電荷
-    double Vn;              // ノード電圧
-    double Vd;              // バイアス電圧
-    double R;               // 抵抗
-    double Rj;              // トンネル抵抗
-    double Cj;              // 接合容量
-    double C;               // 接続容量
-    int legs;               // 足の数
-    double V_sum;           // 周囲のノード電圧の総和
-    std::map<std::string, double> dE; // エネルギー変化量(up, down)
-    std::map<std::string, double> wt; // トンネル待時間(up, down)
-    // std::vector<std::shared_ptr<SEO>> connection; // 接続されている素子のポインタ
+    double Vn;                                              // ノード電圧
+    double Vd;                                              // バイアス電圧
+    double R;                                               // 抵抗
+    double Rj;                                              // トンネル抵抗
+    double Cj;                                              // 接合容量
+    double C;                                               // 接続容量
+    double CL;                                              // 上部の容量
+    int legs;                                               // 足の数
+    int upper_electrons;                                    // 上側の電子数
+    int lower_electrons;                                    // 下側の電子数
+    double V_sum;                                           // 周囲のノード電圧の総和
+    std::map<std::string, double> dE;                       // エネルギー変化量(up1,up2,down1,down2)
+    std::map<std::string, double> wt;                       // トンネル待時間(up1,up2,down1,down2)
     std::vector<std::shared_ptr<BaseElement>> connections;  // 接続されている素子のポインタ
 
 public:
     //-----------コンストラクタ---------// 
     // vectorの初期化用
-    SEO();
+    MEMORY();
     // 引数あり初期設定用
-    SEO(double r, double rj, double cj, double c, double vd, int legscounts);
+    MEMORY(double r, double rj, double cj, double c, double cl, double vd, int legscounts);
 
     //-----------セッター------------//
     // パラメータセットアップ
-    void setUp(double r, double rj, double cj, double c, double vd, int legscounts);
+    void setUp(double r, double rj, double cj, double c, double cl, double vd, int legscounts);
 
     // バイアス電圧を設定
     void setVias(const double vd) override;
 
     // V_sumを設定
     void setVsum(double v) override;
-
-    // 接続情報を設定
-    // void setConnections(const std::vector<std::shared_ptr<SEO>> &connectedSEOs);
 
     void setConnections(const std::vector<std::shared_ptr<BaseElement>>& conns) override;
 
@@ -72,9 +70,6 @@ public:
     // ノード電圧を取得
     double getVn() const override;
 
-    // // 接続されてる振動子を取得
-    // std::vector<std::shared_ptr<SEO>> getConnection() const;
-
     // 接続されてる振動子の電圧の総和を取得
     double getSurroundingVsum() const override;
 
@@ -89,6 +84,7 @@ public:
 
     // oneway用の関数のため呼び出すとエラー発生
     std::shared_ptr<BaseElement> getInternalElement(int index) const override;
+
     //-------- 汎用処理 -------------//
     // 0から1の間の乱数を生成
     double Random();
@@ -117,9 +113,6 @@ public:
 
     // テスト用Vnセッター
     void setVn(double vn);
-
-    // テスト用Qnセッター
-    void setQ(double qn);
 };
 
 #endif // SEO_HPP
