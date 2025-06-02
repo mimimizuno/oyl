@@ -1,7 +1,7 @@
 #include "memory_class.hpp"
 //------ コンストラクタ（パラメータの初期設定）---------//
 // 初期値無し
-MEMORY::MEMORY() : R(0), Rj(0), Cj(0), C(0), Vd(0), Vn(0), legs(0), V_sum(0), upper_electrons(0), lower_electrons(0)
+MEMORY::MEMORY() : Rj(0), Cj(0), C(0), Vd(0), Vn(0), legs(0), V_sum(0), upper_electrons(0), lower_electrons(0)
 {
     dE["up1"] = 0.0;
     dE["up2"] = 0.0;
@@ -14,8 +14,8 @@ MEMORY::MEMORY() : R(0), Rj(0), Cj(0), C(0), Vd(0), Vn(0), legs(0), V_sum(0), up
 }
 
 // 初期値あり
-MEMORY::MEMORY(double r, double rj, double cj, double c, double cl, double vd, int legscounts)
-    : R(r), Rj(rj), Cj(cj), C(c), Vd(vd), Vn(0.0), legs(legscounts), V_sum(0.0), upper_electrons(0), lower_electrons(0)
+MEMORY::MEMORY(double rj, double cj, double c, double cl, double vd, int legscounts)
+    : Rj(rj), Cj(cj), C(c), Vd(vd), Vn(0.0), legs(legscounts), V_sum(0.0), upper_electrons(0), lower_electrons(0)
 {
     dE["up1"] = 0.0;
     dE["up2"] = 0.0;
@@ -29,9 +29,8 @@ MEMORY::MEMORY(double r, double rj, double cj, double c, double cl, double vd, i
 
 //-----------セッター------------//
 // パラメータセットアップ
-void MEMORY::setUp(double r, double rj, double cj, double c, double cl, double vd, int legscounts)
+void MEMORY::setUp(double rj, double cj, double c, double cl, double vd, int legscounts)
 {
-    R = r;
     Rj = rj;
     Cj = cj;
     C = c;
@@ -199,12 +198,6 @@ double MEMORY::Random()
 }
 
 //-------- テスト用 -----------//
-// テスト用Rゲッター
-double MEMORY::getR() const
-{
-    return R;
-}
-
 // テスト用Rjゲッター
 double MEMORY::getRj() const
 {

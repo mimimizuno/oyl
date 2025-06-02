@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cmath>
-
+#include "memory_class.hpp"
 using namespace std;
 constexpr double e = 0.1602;     // 電荷量
 
+
+// 多重のパラメータ計算
 int main(){
     int N;
     int leg;
@@ -12,7 +14,7 @@ int main(){
     double Cj_second;
     double Vth;
 
-    cout << "N leg C Vth" << endl;
+    cout << "input N leg C Vth" << endl;
     cin >> N >> leg >> C >> Vth;
 
     double formula_item_a = 2 * Vth;
@@ -26,4 +28,16 @@ int main(){
     
     cout << "Vth = " << Vth << " leg = " << leg << " N = " << N << endl;
     cout << "Cj_first = " << Cj_first << " Cj_second = " << Cj_second << endl;
+}
+
+// メモリのヒステリシス
+int main(){
+    int leg;
+    double C;
+    double CL;
+    double Vth;
+    cout << "input leg C CL" << endl;
+    cin >> leg >> C >> CL;
+
+
 }
