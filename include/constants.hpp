@@ -4,7 +4,8 @@
 // 定数をまとめておくファイル
 
 constexpr double e = 0.1602;     // 電荷量
-constexpr int leg1 = 1;          // 足の数の定義
+constexpr int leg0 = 0;          // 足の数の定義
+constexpr int leg1 = 1;
 constexpr int leg2 = 2;
 constexpr int leg3 = 3;
 constexpr int leg4 = 4;

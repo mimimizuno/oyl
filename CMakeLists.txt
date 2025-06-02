@@ -21,7 +21,7 @@ target_include_directories(oyl-utils PUBLIC ${PROJECT_SOURCE_DIR}/include)
 # main.cpp 実行ファイル
 add_executable(MainApp main.cpp)
 # サンプルを実行したい場合は下のように記述。↑のmain.cppはコメントアウト
-# add_executable(MainApp sample/memory-sample.cpp)
+# add_executable(MainApp sample/parameter_calc.cpp)
 target_link_libraries(MainApp PRIVATE oyl-utils ${OpenCV_LIBS})
 
 # テストオプション

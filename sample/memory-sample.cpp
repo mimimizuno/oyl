@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------------------
-// onewayのテスト
-// oneway unit を使ったテストシミュレーション
+// memoryのサンプル
+// 振動子一つとメモリ一つの接続
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -39,7 +39,7 @@ int main()
     grid_seo.setElement(0, 0, seo);
 
     auto memory = std::make_shared<MEMORY>();
-    memory->setUp(R,Rj,Cj_memory,C,CL,Vd_memory,leg1);
+    memory->setUp(Rj,Cj_memory,C,CL,Vd_memory,leg1);
     grid_memory.setElement(0, 0, memory);
 
     // 接続 
