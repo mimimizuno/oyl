@@ -23,7 +23,7 @@ constexpr double Cj_leg5 = 10.0; // 足5振動子のトンネル容量[aF]
 constexpr double Cj_leg6 = 8.0;  // 足6振動子のトンネル容量[aF]
 constexpr double multi_Cj = 390; // 20重振動子のトンネル容量[aF]
 
-// 閾値電圧に合わせて、多重数、足の数、接合容量から振動子のCjの値を返す関数
+// 閾値電圧に合わせて、足の数、接合容量から振動子のCjの値を返す関数
 inline int seo_junction_cj_calc(int leg, double C, double Vth){
     return static_cast<int>(e / (2 * Vth)) - leg * C;
 }
@@ -39,4 +39,15 @@ inline int multi_junction_cj_calc(int multi_junction_num, int leg, double C, dou
     return Cj_first;
 }
 
+// 矩形波を生成する
+inline double getRectangularV(double t, double V_amp, double t_on, double t_off) {
+    double period = t_on + t_off;
+    return (std::fmod(t, period) < t_on) ? V_amp : 0.0;
+}
+
+// 隣接振振動子のトンネルで変化する電圧
+inline double tunnelV(double C, int myleg, int yourleg, double myCj, double yourCj)
+{
+    return ((C * e) / ((myleg * C + myCj) * (yourleg * C + yourCj)));
+}
 #endif // CONSTANTS_HPP

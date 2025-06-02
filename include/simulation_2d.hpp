@@ -90,6 +90,9 @@ public:
 
     // 実行中の進捗状況を表示する
     void printProgressBar();
+
+    // tを取得する
+    double getTime() const;
 };
 
 // コンストラクタ
@@ -386,6 +389,12 @@ void Simulation2D<Element>::printProgressBar(){
         std::cout << "[INFO] Simulation progress: " << bar
                   << " " << percent << "%" << std::endl;
     }
+}
+
+// tを取得する
+template <typename Element>
+double Simulation2D<Element>::getTime() const {
+    return t;
 }
 
 #endif // SIMULATION_2D_HPP
