@@ -16,7 +16,6 @@ class MEMORY : public BaseElement {
 private:
     double Vn;                                              // ノード電圧
     double Vd;                                              // バイアス電圧
-    double R;                                               // 抵抗
     double Rj;                                              // トンネル抵抗
     double Cj;                                              // 接合容量
     double C;                                               // 接続容量
@@ -34,11 +33,11 @@ public:
     // vectorの初期化用
     MEMORY();
     // 引数あり初期設定用
-    MEMORY(double r, double rj, double cj, double c, double cl, double vd, int legscounts);
+    MEMORY(double rj, double cj, double c, double cl, double vd, int legscounts);
 
     //-----------セッター------------//
     // パラメータセットアップ
-    void setUp(double r, double rj, double cj, double c, double cl, double vd, int legscounts);
+    void setUp(double rj, double cj, double c, double cl, double vd, int legscounts);
 
     // バイアス電圧を設定
     void setVias(const double vd) override;
