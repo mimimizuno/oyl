@@ -90,6 +90,9 @@ public:
 
     // 実行中の進捗状況を表示する
     void printProgressBar();
+
+    // tを取得する
+    double getTime() const;
 };
 
 // コンストラクタ
@@ -126,77 +129,28 @@ void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
 {
     auto ptr = tunnelgrid.getTunnelPlace();
     //----------------トンネル場所の記録--------------------------------
-    auto [y, x] = tunnelgrid.getPositionOf(ptr);
-    std::ofstream log("../output/tunnel_log.txt", std::ios::app);
-    if (log.is_open()) {
-        log << "t=" << t
-            << ", x=" << x
-            << ", y=" << y
-            << ", dir=" << tunnelgrid.getTunnelDirection()
-            << ", grid=" << tunnelgrid.getOutputLabel()
-            << std::endl;
-    }
+    // auto [y, x] = tunnelgrid.getPositionOf(ptr);
+    // std::ofstream log("../output/tunnel_log.txt", std::ios::app);
+    // if (log.is_open()) {
+    //     log << "t=" << t
+    //         << ", x=" << x
+    //         << ", y=" << y
+    //         << ", dir=" << tunnelgrid.getTunnelDirection()
+    //         << ", grid=" << tunnelgrid.getOutputLabel()
+    //         << std::endl;
+    // }
     //-----------------------------------------------------------------
     // 実際のトンネル処理
     ptr->setTunnel(tunnelgrid.getTunnelDirection());
+    
 }
 
-// ファイルを開く
-template <typename Element>
-void Simulation2D<Element>::openFiles() const
-{
-    // for (auto &outputdata : printdatavector)
-    // {
-    //     outputdata.openFile();
-    // }
-}
-
-// ファイルを閉じる
-template <typename Element>
-void Simulation2D<Element>::closeFiles() const
-{
-    // for (auto &outputdata : printdatavector)
-    // {
-    //     outputdata.closeFile();
-    // }
-}
-
-// 出力処理（未実装部分を仮追加）
-template <typename Element>
-void Simulation2D<Element>::outputToFile()
-{    
-    // if (accumulatedTime >= outputInterval)
-    // {
-    //     accumulatedTime -= outputInterval;
-    //     // TODO: 各 printdatavector に対してデータを渡す処理を入れる
-    // }
-}
-
-// template <typename Element>
-// void Simulation2D<Element>::addSelectedElement(std::ofstream& ofs, std::shared_ptr<Element> element)
-// {
-//     selectedElements.emplace_back(&ofs, element);
-// }
 template <typename Element>
 void Simulation2D<Element>::addSelectedElements(std::shared_ptr<std::ofstream> ofs, const std::vector<std::shared_ptr<Element>>& elems)
 {
     selectedElements.emplace_back(ofs, elems);
 }
 
-
-
-// template <typename Element>
-// void Simulation2D<Element>::outputSelectedElements()
-// {
-//     for (auto& [ofsPtr, elemPtr] : selectedElements)
-//     {
-//         // pair型で格納したファイルと素子の情報からファイルに出力する
-//         if (!ofsPtr || !(*ofsPtr) || !elemPtr)
-//             // 情報がない場合はcontinue
-//             continue;
-//         (*ofsPtr) << t << " " << elemPtr->getVn() << endl;
-//     }
-// }
 template <typename Element>
 void Simulation2D<Element>::outputSelectedElements()
 {
@@ -435,6 +389,12 @@ void Simulation2D<Element>::printProgressBar(){
         std::cout << "[INFO] Simulation progress: " << bar
                   << " " << percent << "%" << std::endl;
     }
+}
+
+// tを取得する
+template <typename Element>
+double Simulation2D<Element>::getTime() const {
+    return t;
 }
 
 #endif // SIMULATION_2D_HPP

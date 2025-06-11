@@ -13,14 +13,15 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 add_library(oyl-utils
  src/seo_class.cpp
  src/multi_seo_class.cpp
+ src/memory_class.cpp
  src/oyl_video.cpp
 )
 target_include_directories(oyl-utils PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # main.cpp 実行ファイル
-# add_executable(MainApp main.cpp)
+add_executable(MainApp main.cpp)
 # サンプルを実行したい場合は下のように記述。↑のmain.cppはコメントアウト
-add_executable(MainApp sample/particle-computation-multiseo.cpp)
+# add_executable(MainApp sample/parameter_calc.cpp)
 target_link_libraries(MainApp PRIVATE oyl-utils ${OpenCV_LIBS})
 
 # テストオプション
