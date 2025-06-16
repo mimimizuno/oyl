@@ -5,18 +5,20 @@ mkdir -p output
 # 出力ファイルのリセット
 rm -f output/*
 
-# ビルドフォルダに移動
-cd "$(dirname "$0")/build"
+set -e  # どこかでエラーが出たら即終了
 
-# CMakeで構成（初回またはCMakeLists.txt変更時だけ）
-if [ ! -f Makefile ]; then
-# -DBUILD_TESTING=ONだとテスト用ビルド込み。=OFFだとテスト用のビルドはしない
-  cmake -G "MinGW Makefiles"  -DBUILD_TESTING=OFF .. || exit 1
+BUILD_DIR=build
+EXECUTABLE=MainApp.exe
+TESTING=OFF
+JOBS=8  # 並列スレッド数（適宜変更）
+
+# 初回CMake構成のみ
+if [ ! -f ${BUILD_DIR}/Makefile ]; then
+  cmake -S . -B ${BUILD_DIR} -G "MinGW Makefiles" -DBUILD_TESTING=${TESTING}
 fi
 
-# makeでビルド
-mingw32-make || exit 1
+# ビルド（並列化）
+cmake --build ${BUILD_DIR} --parallel ${JOBS}
 
 # 実行
-./MainApp.exe
-# ./UnitTests
+./${BUILD_DIR}/${EXECUTABLE}

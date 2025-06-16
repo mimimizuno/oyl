@@ -74,7 +74,7 @@ public:
     void setOnewayMultiSeoParam(double r, double rj, double cj_leg2, double cj_leg3, double c, double vd, int junction_num, double ratio = 0.8)
     {
         // ratio * ((e * multi_num * multi_num * Cs) / ((myleg * multi_num * Cs + myCjs) * (myleg * multi_num * Cs + yourCjs)));
-        double vias = -vd + ((c * junction_num * junction_num * e) / ((leg3 * junction_num * c + cj_leg3) * (leg3 * junction_num * c + cj_leg2)));
+        double vias = -vd + ratio * ((c * junction_num * junction_num * e) / ((leg3 * junction_num * c + cj_leg3) * (leg3 * junction_num * c + cj_leg2)));
         for (int i = 0; i < 4; i++)
         {
             auto ptr = std::dynamic_pointer_cast<MultiSEO>(ows[i]);
