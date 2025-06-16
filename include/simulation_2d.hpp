@@ -33,8 +33,10 @@ private:
     // std::vector<std::pair<std::ofstream*, std::shared_ptr<Element>>> selectedElements;
     // 複数素子を1つのファイルに出力するための構造
     std::vector<std::pair<std::shared_ptr<std::ofstream>, std::vector<std::shared_ptr<Element>>>> selectedElements;
-
-
+    // トンネル情報を追跡する素子のベクトル
+    std::vector<std::shared_ptr<Element>> trackedElements;
+    // トンネルした素子を記録するための変数
+    std::vector<double> tunnelTimes; 
 
 public:
     // コンストラクタ(刻み時間,シミュレーションの終了タイミング)
@@ -93,6 +95,13 @@ public:
 
     // tを取得する
     double getTime() const;
+
+    // トンネルしたかどうかを追跡する素子を追加する
+    void addTrackedElements(const std::vector<std::shared_ptr<Element>>& elems);
+
+    // トンネル状況を記録する変数を返す
+    const std::vector<double>& getTunnelTimes() const;
+
 };
 
 // コンストラクタ
@@ -128,18 +137,16 @@ template <typename Element>
 void Simulation2D<Element>::handleTunnels(Grid2D<Element> &tunnelgrid)
 {
     auto ptr = tunnelgrid.getTunnelPlace();
-    //----------------トンネル場所の記録--------------------------------
-    // auto [y, x] = tunnelgrid.getPositionOf(ptr);
-    // std::ofstream log("../output/tunnel_log.txt", std::ios::app);
-    // if (log.is_open()) {
-    //     log << "t=" << t
-    //         << ", x=" << x
-    //         << ", y=" << y
-    //         << ", dir=" << tunnelgrid.getTunnelDirection()
-    //         << ", grid=" << tunnelgrid.getOutputLabel()
-    //         << std::endl;
-    // }
-    //-----------------------------------------------------------------
+    if (!trackedElements.empty()) {
+        // インデックス順に記録
+        auto it = std::find(trackedElements.begin(), trackedElements.end(), ptr);
+        if (it != trackedElements.end()) {
+            size_t index = std::distance(trackedElements.begin(), it);
+            if (tunnelTimes[index] == 0) {
+                tunnelTimes[index] = t;
+            }
+        }
+    }
     // 実際のトンネル処理
     ptr->setTunnel(tunnelgrid.getTunnelDirection());
     
@@ -397,4 +404,16 @@ double Simulation2D<Element>::getTime() const {
     return t;
 }
 
+// トンネル情報を追跡する素子を追加する
+template <typename Element>
+void Simulation2D<Element>::addTrackedElements(const std::vector<std::shared_ptr<Element>>& elems) {
+    trackedElements = elems;
+    tunnelTimes.assign(elems.size(), 0); // 全て t=0 で初期化
+}
+
+// トンネル状況を記録する変数を返す
+template <typename Element>
+const std::vector<double> &Simulation2D<Element>::getTunnelTimes() const{
+    return tunnelTimes;
+}
 #endif // SIMULATION_2D_HPP

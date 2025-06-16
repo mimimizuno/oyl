@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
+#include <omp.h>
 #include "base_element.hpp"
 
 // 2次元グリッドで任意の素子（Element）を管理するテンプレートクラス
@@ -30,10 +31,13 @@ private:
     bool outputEnabled;
     // メモリとして計算処理をするかどうか（デフォルトはfalse、trueの場合はメモリとして計算する）
     bool isMemory;
+    // 複数スレッドを用いた並列計算をするかどうか（デフォルトはtrue）
+    bool isParallel;
+
 public:
     // コンストラクタ：指定した行数・列数でグリッドを初期化
-    // enableOutputで動画化するかどうか、isMemoryでメモリとして扱うかどうか
-    Grid2D(int rows, int cols, bool enableOutput = true, bool ismemory = false);
+    // enableOutputで動画化するかどうか、isparallelで並列処理、isMemoryでメモリとして扱うかどうか
+    Grid2D(int rows, int cols, bool enableOutput = true, bool isparallel=true, bool ismemory = false);
 
     // 指定位置の要素を取得
     std::shared_ptr<Element> getElement(int row, int col) const;
@@ -95,9 +99,9 @@ public:
 
 // コンストラクタ：全要素をmake_sharedで初期化
 template <typename Element>
-Grid2D<Element>::Grid2D(int rows, int cols, bool enableOutput, bool ismemory)
+Grid2D<Element>::Grid2D(int rows, int cols, bool enableOutput, bool isparallel, bool ismemory)
     : rows_(rows), cols_(cols), grid(rows, std::vector<std::shared_ptr<Element>>(cols)),
-      outputEnabled(enableOutput), isMemory(ismemory)
+      outputEnabled(enableOutput),isParallel(isparallel), isMemory(ismemory)
 {
     if (rows <= 0 || cols <= 0)
     {
@@ -123,12 +127,17 @@ void Grid2D<Element>::setElement(int row, int col, const std::shared_ptr<Element
 template <typename Element>
 void Grid2D<Element>::updateGridSurVn()
 {
-    for (auto &row : grid)
-    {
-        for (auto &elem : row)
-        {
-            elem->setSurroundingVoltages();
+    if (isParallel) {
+#pragma omp parallel for collapse(2)
+        for (int i = 0; i < rows_; ++i) {
+            for (int j = 0; j < cols_; ++j) {
+                grid[i][j]->setSurroundingVoltages();
+            }
         }
+    } else {
+        for (auto &row : grid)
+            for (auto &elem : row)
+                elem->setSurroundingVoltages();
     }
 }
 
@@ -136,12 +145,17 @@ void Grid2D<Element>::updateGridSurVn()
 template <typename Element>
 void Grid2D<Element>::updateGridVn()
 {
-    for (auto &row : grid)
-    {
-        for (auto &elem : row)
-        {
-            elem->setPcalc();
+    if (isParallel) {
+#pragma omp parallel for collapse(2)
+        for (int i = 0; i < rows_; ++i) {
+            for (int j = 0; j < cols_; ++j) {
+                grid[i][j]->setPcalc();
+            }
         }
+    } else {
+        for (auto &row : grid)
+            for (auto &elem : row)
+                elem->setPcalc();
     }
 }
 
@@ -149,65 +163,137 @@ void Grid2D<Element>::updateGridVn()
 template <typename Element>
 void Grid2D<Element>::updateGriddE()
 {
-    for (auto &row : grid)
-    {
-        for (auto &elem : row)
-        {
-            elem->setdEcalc();
+    if (isParallel) {
+#pragma omp parallel for collapse(2)
+        for (int i = 0; i < rows_; ++i) {
+            for (int j = 0; j < cols_; ++j) {
+                grid[i][j]->setdEcalc();
+            }
         }
+    } else {
+        for (auto &row : grid)
+            for (auto &elem : row)
+                elem->setdEcalc();
     }
 }
 
 // グリッド全体のトンネル待ち時間wtを計算し、最小wtとトンネル素子・方向を記録
+// template <typename Element>
+// bool Grid2D<Element>::gridminwt(const double dt)
+// {
+//     minwt = dt;
+//     for (auto &row : grid)
+//     {
+//         for (auto &elem : row)
+//         {
+//             // メモリ以外
+//             if (!isMemory && elem->calculateTunnelWt())
+//             {
+//                 // up方向かdown方向で値を持っている方をtmpwtに代入
+//                 double tmpwt = std::max(elem->getWT()["up"], elem->getWT()["down"]);
+//                 // tmpwtがminwtよりも値が小さい時にminwtを更新
+//                 if(tmpwt < minwt){
+//                     tunneldirection = (tmpwt == elem->getWT()["up"]) ? "up" : "down";
+//                     tunnelplace = elem;
+//                     minwt = std::min(minwt, tmpwt);
+//                 }
+//             }
+//             // メモリの処理
+//             if (isMemory && elem->calculateTunnelWt())
+//             {
+//                 double tmpwt = 0.0;
+//                 std::string direction = "";
+
+//                 if (elem->getWT()["up1"] > 0) {
+//                     tmpwt = elem->getWT()["up1"];
+//                     direction = "up1";
+//                 } else if (elem->getWT()["up2"] > 0) {
+//                     tmpwt = elem->getWT()["up2"];
+//                     direction = "up2";
+//                 } else if (elem->getWT()["down1"] > 0) {
+//                     tmpwt = elem->getWT()["down1"];
+//                     direction = "down1";
+//                 } else if (elem->getWT()["down2"] > 0) {
+//                     tmpwt = elem->getWT()["down2"];
+//                     direction = "down2";
+//                 }
+
+//                 // tmpwtがminwtよりも小さい時にminwtを更新
+//                 if (tmpwt < minwt) {
+//                     tunneldirection = direction;
+//                     tunnelplace = elem;
+//                     minwt = tmpwt;
+//                 }
+//             }
+//         }
+//     }
+//     return minwt < dt;
+// }
 template <typename Element>
 bool Grid2D<Element>::gridminwt(const double dt)
 {
     minwt = dt;
-    for (auto &row : grid)
+
+#pragma omp parallel for collapse(2)
+    for (int i = 0; i < rows_; ++i)
     {
-        for (auto &elem : row)
+        for (int j = 0; j < cols_; ++j)
         {
+            auto elem = grid[i][j];
+
             // メモリ以外
             if (!isMemory && elem->calculateTunnelWt())
             {
-                // up方向かdown方向で値を持っている方をtmpwtに代入
-                double tmpwt = std::max(elem->getWT()["up"], elem->getWT()["down"]);
-                // tmpwtがminwtよりも値が小さい時にminwtを更新
-                if(tmpwt < minwt){
-                    tunneldirection = (tmpwt == elem->getWT()["up"]) ? "up" : "down";
-                    tunnelplace = elem;
-                    minwt = std::min(minwt, tmpwt);
+                const auto& wt = elem->getWT();
+                double tmpwt = std::max(wt.at("up"), wt.at("down"));
+
+                if (tmpwt < minwt) {
+#pragma omp critical
+                    {
+                        if (tmpwt < minwt) {
+                            tunneldirection = (tmpwt == wt.at("up")) ? "up" : "down";
+                            tunnelplace = elem;
+                            minwt = tmpwt;
+                        }
+                    }
                 }
             }
+
             // メモリの処理
             if (isMemory && elem->calculateTunnelWt())
             {
+                const auto& wt = elem->getWT();
                 double tmpwt = 0.0;
                 std::string direction = "";
 
-                if (elem->getWT()["up1"] > 0) {
-                    tmpwt = elem->getWT()["up1"];
+                if (wt.count("up1") && wt.at("up1") > 0) {
+                    tmpwt = wt.at("up1");
                     direction = "up1";
-                } else if (elem->getWT()["up2"] > 0) {
-                    tmpwt = elem->getWT()["up2"];
+                } else if (wt.count("up2") && wt.at("up2") > 0) {
+                    tmpwt = wt.at("up2");
                     direction = "up2";
-                } else if (elem->getWT()["down1"] > 0) {
-                    tmpwt = elem->getWT()["down1"];
+                } else if (wt.count("down1") && wt.at("down1") > 0) {
+                    tmpwt = wt.at("down1");
                     direction = "down1";
-                } else if (elem->getWT()["down2"] > 0) {
-                    tmpwt = elem->getWT()["down2"];
+                } else if (wt.count("down2") && wt.at("down2") > 0) {
+                    tmpwt = wt.at("down2");
                     direction = "down2";
                 }
 
-                // tmpwtがminwtよりも小さい時にminwtを更新
                 if (tmpwt < minwt) {
-                    tunneldirection = direction;
-                    tunnelplace = elem;
-                    minwt = tmpwt;
+#pragma omp critical
+                    {
+                        if (tmpwt < minwt) {
+                            tunneldirection = direction;
+                            tunnelplace = elem;
+                            minwt = tmpwt;
+                        }
+                    }
                 }
             }
         }
     }
+
     return minwt < dt;
 }
 
@@ -216,13 +302,18 @@ template <typename Element>
 void Grid2D<Element>::updateGridQn(const double dt)
 {
     // メモリ以外の素子を更新
-    if(!isMemory){
-        for (auto &row : grid)
-        {
-            for (auto &elem : row)
-            {
-                elem->setNodeCharge(dt);
+    if (!isMemory) {
+        if (isParallel) {
+#pragma omp parallel for collapse(2)
+            for (int i = 0; i < rows_; ++i) {
+                for (int j = 0; j < cols_; ++j) {
+                    grid[i][j]->setNodeCharge(dt);
+                }
             }
+        } else {
+            for (auto &row : grid)
+                for (auto &elem : row)
+                    elem->setNodeCharge(dt);
         }
     }
 }

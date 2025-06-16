@@ -142,5 +142,61 @@ void setMazeBiasWithDirection(
     }
 }
 
+// 衝突判定回路　多重トンネル用
+template<typename Element>
+void setMazeBiasWithDirection_multi(
+    Grid2D<Element>& grid,
+    const std::vector<std::vector<int>>& maze,
+    const std::string& direction,
+    double Vd_normal,
+    int multi_num,
+    double cj_leg2,
+    double cj_leg3,
+    double c = 2.0,
+    double ratio = 0.8,
+    double Vd_wall = 0.0
+) {
+    double Vd_lower = Vd_normal - ratio * ((c * multi_num * multi_num * e) / ((leg3 * multi_num * c + cj_leg3) * (leg3 * multi_num * c + cj_leg2)));
+    int rows = grid.numRows();
+    int cols = grid.numCols();
+
+    if (maze.size() != static_cast<size_t>(rows - 2) || maze[0].size() != static_cast<size_t>(cols - 2)) {
+        throw std::invalid_argument("Maze size must match grid size - 2.");
+    }
+
+    // まずすべてを壁に初期化
+    for (int y = 0; y < rows; ++y)
+        for (int x = 0; x < cols; ++x)
+            grid.getElement(y, x)->setVias(Vd_wall);
+
+    for (int y = 1; y < rows - 1; ++y) {
+        for (int x = 1; x < cols - 1; ++x) {
+            int maze_y = y - 1;
+            int maze_x = x - 1;
+
+            if (maze[maze_y][maze_x] != 1) continue; // 通路だけ対象
+
+            bool hasWall = false;
+            if (direction == "up" && maze_y > 0 && maze[maze_y - 1][maze_x] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (y + 1 < rows - 1 && maze[maze_y + 1][maze_x] == 1) grid.getElement(y + 1, x)->setVias(Vd_lower);
+            } else if (direction == "down" && maze_y < maze.size() - 1 && maze[maze_y + 1][maze_x] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (y - 1 > 0 && maze[maze_y - 1][maze_x] == 1) grid.getElement(y - 1, x)->setVias(Vd_lower);
+            } else if (direction == "left" && maze_x > 0 && maze[maze_y][maze_x - 1] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (x + 1 < cols - 1 && maze[maze_y][maze_x + 1] == 1) grid.getElement(y, x + 1)->setVias(Vd_lower);
+            } else if (direction == "right" && maze_x < maze[0].size() - 1 && maze[maze_y][maze_x + 1] == 0) {
+                hasWall = true;
+                grid.getElement(y, x)->setVias(Vd_normal);
+                if (x - 1 > 0 && maze[maze_y][maze_x - 1] == 1) grid.getElement(y, x - 1)->setVias(Vd_lower);
+            }
+        }
+    }
+}
+
 
 #endif // PARTICLE_COMPUTATION_METHODS_HPP
