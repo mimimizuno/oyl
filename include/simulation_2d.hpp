@@ -100,7 +100,7 @@ public:
     void addTrackedElements(const std::vector<std::shared_ptr<Element>>& elems);
 
     // トンネル状況を記録する変数を返す
-    std::vector<double>& getTunnelTimes() const;
+    const std::vector<double>& getTunnelTimes() const;
 
 };
 
@@ -413,7 +413,7 @@ void Simulation2D<Element>::addTrackedElements(const std::vector<std::shared_ptr
 
 // トンネル状況を記録する変数を返す
 template <typename Element>
-std::vector<double> &Simulation2D<Element>::getTunnelTimes() const{
+const std::vector<double> &Simulation2D<Element>::getTunnelTimes() const{
     return tunnelTimes;
 }
 #endif // SIMULATION_2D_HPP
