@@ -27,8 +27,8 @@ target_link_libraries(oyl-utils PUBLIC OpenMP::OpenMP_CXX)
 
 # メイン実行ファイル
 # メイン以外を実行したい場合は30行目を31行目のように変える
+# add_executable(MainApp data/var_multi_loop.cpp)
 add_executable(MainApp main.cpp)
-# add_executable(MainApp sample/seo-2dim-sample.cpp)
 
 target_include_directories(MainApp
     PRIVATE

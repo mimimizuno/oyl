@@ -200,7 +200,7 @@ void Simulation2D<Element>::outputTooyl()
             }
             else
             {
-                label = "../output" + std::to_string(outputIndex);
+                label = "output" + std::to_string(outputIndex);
                 ++outputIndex;
             }
 
@@ -360,6 +360,12 @@ void Simulation2D<Element>::generateGnuplotScript(const std::string& dataFilenam
         }
     }
 
+    std::string plotFilename = dataFilename;
+    const std::string prefix = "output/";
+    if (plotFilename.rfind(prefix, 0) == 0) {
+        plotFilename = plotFilename.substr(prefix.size());
+    }
+
     gnuFile << "#unset key\n";
     gnuFile << "#set title 'no'\n";
     gnuFile << "set terminal qt font \"Arial,10\"\n";
@@ -369,7 +375,7 @@ void Simulation2D<Element>::generateGnuplotScript(const std::string& dataFilenam
 
     gnuFile << "p ";
     for (size_t i = 0; i < labels.size(); ++i) {
-        gnuFile << "'" << dataFilename << "' u 1:" << (i + 2) << " title '" << labels[i] << "' w steps lw 3";
+        gnuFile << "'" << plotFilename << "' u 1:" << (i + 2) << " title '" << labels[i] << "' w steps lw 3";
         if (i != labels.size() - 1)
             gnuFile << ",\\\n  ";
     }

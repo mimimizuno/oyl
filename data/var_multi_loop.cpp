@@ -15,14 +15,14 @@
 constexpr int particles = 2;
 constexpr int size_x = 17;
 constexpr int size_y = 12;
-constexpr double Vd_seo = 0.004;
-constexpr double Vd_oneway = 0.004;
+constexpr double Vd_seo = 0.0039;
+constexpr double Vd_oneway = 0.0039;
 constexpr double R = 1.5;
 constexpr double R_small = 0.8;
 constexpr double Rj = 0.001;
 constexpr double C = 2.0;
 constexpr double dt = 0.1;
-constexpr double endtime = 300;
+constexpr double endtime = 500;
 constexpr double setVth = 0.004;
 
 double cj_leg2 = seo_junction_cj_calc(leg2, C, setVth);
@@ -30,8 +30,8 @@ double cj_leg3 = seo_junction_cj_calc(leg3, C, setVth);
 double cj_leg4 = seo_junction_cj_calc(leg4, C, setVth);
 double cj_leg5 = seo_junction_cj_calc(leg5, C, setVth);
 double cj_leg6 = seo_junction_cj_calc(leg6, C, setVth);
-constexpr int repeat_count = 10;
-constexpr int junction_num_max = 4;
+constexpr int repeat_count = 1000;
+constexpr int junction_num_max = 0;
 
 using Grid = Grid2D<BaseElement>;
 using Sim = Simulation2D<BaseElement>;
@@ -51,15 +51,13 @@ int main()
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     };
 
-    for(int multi_junction_var = 4; multi_junction_var <= junction_num_max; multi_junction_var++){
+    for(int multi_junction_var = 0; multi_junction_var <= junction_num_max; multi_junction_var++){
         int multi_num = multi_junction_var;
         double multi_cj_leg2 = multi_junction_cj_calc(multi_num, leg2, C, setVth); // 引数の条件に合わせたCjを定義
         double multi_cj_leg3 = multi_junction_cj_calc(multi_num, leg3, C, setVth);
         double multi_cj_leg4 = multi_junction_cj_calc(multi_num, leg4, C, setVth);
         double multi_cj_leg5 = multi_junction_cj_calc(multi_num, leg5, C, setVth);
         double multi_cj_leg6 = multi_junction_cj_calc(multi_num, leg6, C, setVth);
-        double Vd_detec = Vd_seo - 2 * multi_tunnelV(C,leg4,multi_cj_leg4,multi_cj_leg3,multi_junction_var);
-
         std::vector<std::vector<double>> allResults;
         for(int trial = 0; trial < repeat_count; trial++){
             std::cout << "multi_num = " << multi_junction_var << " trial = " << trial << std::endl;
@@ -82,34 +80,34 @@ int main()
             for (int y = 0; y < command_down.numRows(); ++y) {
                 for (int x = 0; x < command_down.numCols(); ++x) {
                     // MultiSEO
-                    {
-                        auto seo = std::make_shared<MultiSEO>();
-                        seo->setUp(R, Rj, multi_cj_leg6, C, Vd_seo, leg6, multi_num);
-                        command_down.setElement(y, x, seo);
-                    }
-                    // SEO
                     // {
-                    //     auto seo = std::make_shared<SEO>();
-                    //     seo->setUp(R, Rj, cj_leg6, C, Vd_seo, leg6);
+                    //     auto seo = std::make_shared<MultiSEO>();
+                    //     seo->setUp(R, Rj, multi_cj_leg6, C, Vd_seo, leg6, multi_num);
                     //     command_down.setElement(y, x, seo);
                     // }
+                    // SEO
+                    {
+                        auto seo = std::make_shared<SEO>();
+                        seo->setUp(R, Rj, cj_leg6, C, Vd_seo, leg6);
+                        command_down.setElement(y, x, seo);
+                    }
                 }
             }
             // 命令方向回路(command_left, command_right)
             for (int y = 0; y < command_left.numRows(); ++y) {
                 for (int x = 0; x < command_left.numCols(); ++x) {
                     // MultiSEO
-                    {
-                        auto seo = std::make_shared<MultiSEO>();
-                        seo->setUp(R, Rj, multi_cj_leg6, C, Vd_seo, leg6, multi_num);
-                        command_left.setElement(y, x, seo);
-                    }
-                    // SEO
                     // {
-                    //     auto seo = std::make_shared<SEO>();
-                    //     seo->setUp(R, Rj, cj_leg6, C, Vd_seo, leg6);
+                    //     auto seo = std::make_shared<MultiSEO>();
+                    //     seo->setUp(R, Rj, multi_cj_leg6, C, Vd_seo, leg6, multi_num);
                     //     command_left.setElement(y, x, seo);
                     // }
+                    // SEO
+                    {
+                        auto seo = std::make_shared<SEO>();
+                        seo->setUp(R, Rj, cj_leg6, C, Vd_seo, leg6);
+                        command_left.setElement(y, x, seo);
+                    }
                 }
             }
 
@@ -117,73 +115,55 @@ int main()
             for (int y = 0; y < detection_down.numRows(); ++y) {
                 for (int x = 0; x < detection_down.numCols(); ++x) {
                     // MultiSEO
-                    {
-                        auto seo = std::make_shared<MultiSEO>();
-                        seo->setUp(R, Rj, multi_cj_leg4, C, Vd_detec, leg4, multi_num);
-                        detection_down.setElement(y, x, seo);
-                    }
-                    //SEO
                     // {
-                    //     auto seo = std::make_shared<SEO>();
-                    //     seo->setUp(R, Rj, cj_leg4, C, Vd_seo, leg4);
+                    //     auto seo = std::make_shared<MultiSEO>();
+                    //     seo->setUp(R, Rj, multi_cj_leg4, C, Vd_seo, leg4, multi_num);
                     //     detection_down.setElement(y, x, seo);
                     // }
+                    //SEO
+                    {
+                        auto seo = std::make_shared<SEO>();
+                        seo->setUp(R, Rj, cj_leg4, C, Vd_seo, leg4);
+                        detection_down.setElement(y, x, seo);
+                    }
                 }
             }
 
             // oneway回路 (oneway_command_down, oneway_CtoD_down, ...)
             for (int y = 0; y < oneway_command_down.numRows(); ++y) {
                 for (int x = 0; x < oneway_command_down.numCols(); ++x) {
-                    {
-                        // onway_command_down(MultiSEO)
-                        auto unit = std::make_shared<OnewayUnit>();
-                        std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
-                        unit->setInternalElements(internal_seos);
-                        unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
-                        oneway_command_down.setElement(y, x, unit);
-                        if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows() - 1){
-                            unit->setOnewayConnections(command_down.getElement(y,x),command_down.getElement(y+1,x));
-                        }
-                    }
                     // {
-                    //     // onway_command_down(SEO)
+                    //     // onway_command_down(MultiSEO)
                     //     auto unit = std::make_shared<OnewayUnit>();
                     //     std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
+                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
                     //     unit->setInternalElements(internal_seos);
-                    //     unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                    //     unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
                     //     oneway_command_down.setElement(y, x, unit);
                     //     if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows() - 1){
                     //         unit->setOnewayConnections(command_down.getElement(y,x),command_down.getElement(y+1,x));
                     //     }
                     // }
-
                     {
-                        // oneway_CtoD_down(MultiSEO)
+                        // onway_command_down(SEO)
                         auto unit = std::make_shared<OnewayUnit>();
                         std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
+                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                         unit->setInternalElements(internal_seos);
-                        unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
-                        oneway_CtoD_down.setElement(y, x, unit);
-                        if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
-                            int cordinated_x = x / 2;
-                            if(x % particles == 1){
-                                unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1));
-                            }
-                            else {
-                                unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x));
-                            }
+                        unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                        oneway_command_down.setElement(y, x, unit);
+                        if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows() - 1){
+                            unit->setOnewayConnections(command_down.getElement(y,x),command_down.getElement(y+1,x));
                         }
                     }
+
                     // {
-                    //     // oneway_CtoD_down(SEO)
+                    //     // oneway_CtoD_down(MultiSEO)
                     //     auto unit = std::make_shared<OnewayUnit>();
                     //     std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
+                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
                     //     unit->setInternalElements(internal_seos);
-                    //     unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                    //     unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
                     //     oneway_CtoD_down.setElement(y, x, unit);
                     //     if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
                     //         int cordinated_x = x / 2;
@@ -195,32 +175,32 @@ int main()
                     //         }
                     //     }
                     // }
-
                     {
-                        // oneway_DtoC_downtoleft(MultiSEO)
+                        // oneway_CtoD_down(SEO)
                         auto unit = std::make_shared<OnewayUnit>();
                         std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
+                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                         unit->setInternalElements(internal_seos);
-                        unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
-                        oneway_DtoC_downtoleft.setElement(y, x, unit);
-                        if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
-                            int cordinated_y = y / 2;
-                            if(y % particles == 1){
-                                unit->setOnewayConnections(detection_down.getElement(cordinated_y + 1, x),command_left.getElement(y, x));
+                        unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                        oneway_CtoD_down.setElement(y, x, unit);
+                        if(x > 0 && x < command_down.numCols() && y > 0 && y < command_down.numRows()){
+                            int cordinated_x = x / 2;
+                            if(x % particles == 1){
+                                unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x + 1));
                             }
                             else {
-                                unit->setOnewayConnections(detection_down.getElement(cordinated_y, x),command_left.getElement(y, x));
+                                unit->setOnewayConnections(command_down.getElement(y,x),detection_down.getElement(y,cordinated_x));
                             }
                         }
                     }
+
                     // {
-                    //     // oneway_DtoC_downtoleft(SEO)
+                    //     // oneway_DtoC_downtoleft(MultiSEO)
                     //     auto unit = std::make_shared<OnewayUnit>();
                     //     std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
+                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
                     //     unit->setInternalElements(internal_seos);
-                    //     unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                    //     unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
                     //     oneway_DtoC_downtoleft.setElement(y, x, unit);
                     //     if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
                     //         int cordinated_y = y / 2;
@@ -232,31 +212,49 @@ int main()
                     //         }
                     //     }
                     // }
-
                     {
-                        // onway_command_left(MultiSEO)
-                        auto unit = std::make_shared<OnewayUnit>("reverse");
+                        // oneway_DtoC_downtoleft(SEO)
+                        auto unit = std::make_shared<OnewayUnit>();
                         std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
+                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
                         unit->setInternalElements(internal_seos);
-                        unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
-                        oneway_command_left.setElement(y, x, unit);
-                        if(x > 0 && x < command_left.numCols() - 1 && y > 0 && y < command_left.numRows()){
-                            unit->setOnewayConnections(command_left.getElement(y,x),command_left.getElement(y,x+1));
+                        unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                        oneway_DtoC_downtoleft.setElement(y, x, unit);
+                        if(x > 0 && x < command_left.numCols() && y > 0 && y < command_left.numRows()){
+                            int cordinated_y = y / 2;
+                            if(y % particles == 1){
+                                unit->setOnewayConnections(detection_down.getElement(cordinated_y + 1, x),command_left.getElement(y, x));
+                            }
+                            else {
+                                unit->setOnewayConnections(detection_down.getElement(cordinated_y, x),command_left.getElement(y, x));
+                            }
                         }
                     }
+
                     // {
-                    //     // onway_command_left(SEO)
+                    //     // onway_command_left(MultiSEO)
                     //     auto unit = std::make_shared<OnewayUnit>("reverse");
                     //     std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
+                    //     for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
                     //     unit->setInternalElements(internal_seos);
-                    //     unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                    //     unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
                     //     oneway_command_left.setElement(y, x, unit);
                     //     if(x > 0 && x < command_left.numCols() - 1 && y > 0 && y < command_left.numRows()){
                     //         unit->setOnewayConnections(command_left.getElement(y,x),command_left.getElement(y,x+1));
                     //     }
                     // }
+                    {
+                        // onway_command_left(SEO)
+                        auto unit = std::make_shared<OnewayUnit>("reverse");
+                        std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
+                        for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
+                        unit->setInternalElements(internal_seos);
+                        unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+                        oneway_command_left.setElement(y, x, unit);
+                        if(x > 0 && x < command_left.numCols() - 1 && y > 0 && y < command_left.numRows()){
+                            unit->setOnewayConnections(command_left.getElement(y,x),command_left.getElement(y,x+1));
+                        }
+                    }
                 }
             }
 
@@ -333,10 +331,10 @@ int main()
             setMazeBias(command_down,maze,"down",Vd_seo);
             setMazeBias(command_left,maze,"left",Vd_seo);
             // MultiSEO
-            setMazeBiasWithDirection_multi(detection_down,maze,"down",Vd_seo, multi_num, multi_cj_leg2, multi_cj_leg3);
+            // setMazeBiasWithDirection_multi(detection_down,maze,"down",Vd_seo, multi_num, multi_cj_leg2, multi_cj_leg3);
 
             // SEO
-            // setMazeBiasWithDirection(detection_down,maze,"down",Vd_seo);
+            setMazeBiasWithDirection(detection_down,maze,"down",Vd_seo);
 
             // === シミュレーション初期化 ===
             Sim sim(dt, endtime);
@@ -386,31 +384,21 @@ int main()
             sim.addTrackedElements(tracked);
 
             // === トリガ設定 ===
-            sim.addVoltageTrigger(150, &command_down, 1, 11, 0.002);
-            sim.addVoltageTrigger(150, &command_down, 1, 15, 0.002);
-            sim.addVoltageTrigger(150, &command_down, 1, 16, 0.002);
-            sim.addVoltageTrigger(150, &command_down, 1, 20, 0.002);
-            sim.addVoltageTrigger(150, &command_down, 1, 23, 0.002);
-            sim.addVoltageTrigger(150, &command_down, 1, 24, 0.002);
+            sim.addVoltageTrigger(200, &command_down, 1, 11, 0.002);
+            sim.addVoltageTrigger(200, &command_down, 1, 15, 0.002);
+            sim.addVoltageTrigger(200, &command_down, 1, 16, 0.002);
+            sim.addVoltageTrigger(200, &command_down, 1, 20, 0.002);
+            sim.addVoltageTrigger(200, &command_down, 1, 23, 0.002);
+            sim.addVoltageTrigger(200, &command_down, 1, 24, 0.002);
 
             // === 実行 ===
-            while(sim.getTime() < endtime){
-                // double rectangularV = getRectangularV(sim.getTime(),tunnelV(C,4,3,cj_leg4,cj_leg3),20,20);
-                double rectangularV = getRectangularV(sim.getTime(),multi_tunnelV(C,leg4,multi_cj_leg4,multi_cj_leg3,multi_junction_var),10,20);
-                for (int y = 0; y < detection_down.numRows(); ++y) {
-                    for (int x = 0; x < detection_down.numCols(); ++x) {
-                        sim.addVoltageTrigger(sim.getTime(), &detection_down, y, x, rectangularV);
-                    }
-                }
-                sim.runStep();
-                sim.printProgressBar();
-            }
+            sim.run();
             // 時刻記録
             allResults.push_back(sim.getTunnelTimes());
         }
 
         // === CSV出力 ===
-        std::string filename = "output/onlyB_junction_" + std::to_string(multi_junction_var) + ".csv";
+        std::string filename = "output/single_junction_" + std::to_string(multi_junction_var) + ".csv";
         std::ofstream ofs(filename);
         for (const auto& row : allResults) {
             for (size_t i = 0; i < row.size(); ++i) {

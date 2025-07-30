@@ -248,7 +248,7 @@ int main()
 
     // === 特定素子の出力設定 ===
 
-    auto ofs1 = std::make_shared<std::ofstream>("../output/speed-check.txt");
+    auto ofs1 = std::make_shared<std::ofstream>("output/speed-check.txt");
     std::vector<std::shared_ptr<BaseElement>> targets1 = {
         command_down.getElement(1,11),
         command_down.getElement(3,11),
@@ -265,7 +265,7 @@ int main()
     };
     sim.addSelectedElements(ofs1, targets1);
     std::vector<std::string> labels1 = {"11-1", "11-2", "15-1", "15-2", "16-1", "16-2", "20-1", "20-2", "23-1", "23-2", "24-1", "24-2"};
-    sim.generateGnuplotScript("../output/speed-check.txt", labels1);
+    sim.generateGnuplotScript("output/speed-check.txt", labels1);
 
     // auto ofs2 = std::make_shared<std::ofstream>("../output/detecleft-55.txt");
     // std::vector<std::shared_ptr<BaseElement>> targets2 = {
@@ -324,7 +324,7 @@ int main()
     {
         auto normalized = oyl::normalizeto255(data);
         oyl::VideoClass video(normalized);
-        video.set_filename("../output/" + label + ".mp4");
+        video.set_filename("output/" + label + ".mp4");
         video.set_codec(cv::VideoWriter::fourcc('m', 'p', '4', 'v'));
         video.set_fps(30.0);
         video.makevideo();

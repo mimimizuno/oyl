@@ -37,7 +37,7 @@ int main(){
     int tunnel_count = 0;
     double ans_right = 0, ans_left = 0, tmp1 = 0, tmp2 = 0;
     Rj = 0.001;
-    string fileName = "../output/hysteresis.txt";
+    string fileName = "output/hysteresis.txt";
     cout << "input"<< endl << "leg C CL Cj V_surrounding" << endl;
     cin >> leg >> C >> CL >> Cj >> V_surrounding;
     ofstream ofs(fileName);

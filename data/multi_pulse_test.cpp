@@ -19,12 +19,18 @@ constexpr double R_small = 0.8;
 constexpr double Rj = 0.001;
 constexpr double C = 2.0;
 constexpr double dt = 0.1;
-constexpr double endtime = 400;
+constexpr double endtime = 600;
 constexpr double Vth = 0.004;
+constexpr int multi_num = 4;
 double cj_leg6 = seo_junction_cj_calc(leg6,C,Vth);
 double cj_leg4 = seo_junction_cj_calc(leg4,C,Vth);
 double cj_leg3 = seo_junction_cj_calc(leg3,C,Vth);
 double cj_leg2 = seo_junction_cj_calc(leg2,C,Vth);
+double multi_cj_leg2 = multi_junction_cj_calc(multi_num, leg2, C, Vth); // 引数の条件に合わせたCjを定義
+double multi_cj_leg3 = multi_junction_cj_calc(multi_num, leg3, C, Vth);
+double multi_cj_leg4 = multi_junction_cj_calc(multi_num, leg4, C, Vth);
+double multi_cj_leg5 = multi_junction_cj_calc(multi_num, leg5, C, Vth);
+double multi_cj_leg6 = multi_junction_cj_calc(multi_num, leg6, C, Vth);
 
 using Grid = Grid2D<BaseElement>;
 using Sim = Simulation2D<BaseElement>;
@@ -38,17 +44,17 @@ int main()
     // 命令方向
     for (int y=0; y<2; y++){
         for(int x=0;x<4;x++){
-            auto seo = std::make_shared<SEO>();
-            seo->setUp(R, Rj, cj_leg6, C, Vd_seo, leg6);
+            auto seo = std::make_shared<MultiSEO>();
+            seo->setUp(R, Rj, multi_cj_leg6, C, Vd_seo, leg6, multi_num);
             command.setElement(y, x, seo);
         }
     }
     
     // 衝突判定
     for(int y = 0;y < 2;y++){
-        double vias = Vd_seo - 2 * tunnelV(C,4,3,cj_leg4,cj_leg3);
-        auto seo = std::make_shared<SEO>();
-        seo->setUp(R_large,Rj,cj_leg4,C,vias,leg4);
+        double vias = Vd_seo - 2 * multi_tunnelV(C,leg4,multi_cj_leg4,multi_cj_leg3,multi_num);
+        auto seo = std::make_shared<MultiSEO>();
+        seo->setUp(R_large,Rj,multi_cj_leg4,C,vias,leg4, multi_num);
         detec.setElement(y,0,seo);
     }
 
@@ -57,9 +63,9 @@ int main()
         for(int x=0;x<4;x++){
             auto unit = std::make_shared<OnewayUnit>();
             std::array<std::shared_ptr<BaseElement>, 4> internal_seos;
-            for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<SEO>();
+            for (int i = 0; i < 4; ++i) internal_seos[i] = std::make_shared<MultiSEO>();
             unit->setInternalElements(internal_seos);
-            unit->setOnewaySeoParam(R, Rj, cj_leg2, cj_leg3, C, Vd_oneway);
+            unit->setOnewayMultiSeoParam(R, Rj, multi_cj_leg2, multi_cj_leg3, C, Vd_oneway, multi_num);
             if(x == 0 || x == 1){
                 unit->setOnewayConnections(command.getElement(y,x),detec.getElement(y,0));
             }
@@ -102,8 +108,8 @@ int main()
     sim.addGrid({command,detec,oneway});
 
     // トリガ
-    sim.addVoltageTrigger(400, &command, 0, 0, 0.004);
-    sim.addVoltageTrigger(410, &command, 1, 0, 0.004);
+    sim.addVoltageTrigger(300, &command, 0, 0, 0.004);
+    sim.addVoltageTrigger(310, &command, 1, 0, 0.004);
 
     // 出力ファイル設定
     auto ofs = std::make_shared<std::ofstream>("output/synchronized-test.txt");
@@ -151,8 +157,8 @@ int main()
 
     // 実行
     while(sim.getTime() < endtime){
-        // double rectangularV = getRectangularV(sim.getTime(),tunnelV(C,4,3,cj_leg4,cj_leg3),20,20);
-        double rectangularV = getRectangularV(sim.getTime(),tunnelV(C,4,3,cj_leg4,cj_leg3),20,50);
+        // double rectangularV = getRectangularV(sim.getTime(),tunnelV(C,4,3,multi_cj_leg4,multi_cj_leg3),20,20);
+        double rectangularV = getRectangularV(sim.getTime(),1.5*multi_tunnelV(C,leg4,multi_cj_leg4,multi_cj_leg3, multi_num),20,40);
         sim.addVoltageTrigger(sim.getTime(), &detec, 0, 0, rectangularV);
         sim.addVoltageTrigger(sim.getTime(),&detec, 1, 0, rectangularV);
         // detec.getElement(0,0)->setVias(vias + rectangularV);

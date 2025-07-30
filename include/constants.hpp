@@ -39,7 +39,7 @@ inline int multi_junction_cj_calc(int multi_junction_num, int leg, double C, dou
     return Cj_first;
 }
 
-// 矩形波を生成する
+// pulse波を生成する
 inline double getRectangularV(double t, double V_amp, double t_on, double t_off) {
     double period = t_on + t_off;
     return (std::fmod(t, period) < t_on) ? V_amp : 0.0;
@@ -50,4 +50,11 @@ inline double tunnelV(double C, int myleg, int yourleg, double myCj, double your
 {
     return ((C * e) / ((myleg * C + myCj) * (yourleg * C + yourCj)));
 }
+
+// 隣接振振動子のトンネルで変化する電圧
+inline double multi_tunnelV(double C, int myleg, double myCj, double yourCj, int multi_num, double ratio=0.8)
+{
+    return ratio * ((C * multi_num * multi_num * e) / ((myleg * multi_num * C + myCj) * (myleg * multi_num * C + yourCj)));
+}
+
 #endif // CONSTANTS_HPP

@@ -490,7 +490,7 @@ int main()
 
     // === 特定素子の出力設定 ===
 
-    auto ofs1 = std::make_shared<std::ofstream>("../output/detecdown-48.txt");
+    auto ofs1 = std::make_shared<std::ofstream>("output/detecdown-48.txt");
     std::vector<std::shared_ptr<BaseElement>> targets1 = {
         detection_down.getElement(4,8),
         command_down.getElement(4,15),
@@ -499,9 +499,9 @@ int main()
         command_left.getElement(8,8),};
     sim.addSelectedElements(ofs1, targets1);
     std::vector<std::string> labels1 = {"detec-down4,8", "command-down4,15", "command-down4,16", "command-left7,8", "command-left8,8"};
-    sim.generateGnuplotScript("../output/detecdown-48.txt", labels1);
+    sim.generateGnuplotScript("output/detecdown-48.txt", labels1);
 
-    auto ofs2 = std::make_shared<std::ofstream>("../output/detecdown-410.txt");
+    auto ofs2 = std::make_shared<std::ofstream>("output/detecdown-410.txt");
     std::vector<std::shared_ptr<BaseElement>> targets2 = {
         detection_down.getElement(4,10),
         command_down.getElement(4,19),
@@ -510,7 +510,7 @@ int main()
         command_left.getElement(8,10),};
     sim.addSelectedElements(ofs2, targets2);
     std::vector<std::string> labels2 = {"detec-down4,10", "command-down4,19", "command-down4,20", "command-left7,10", "command-left8,10"};
-    sim.generateGnuplotScript("../output/detecdown-410.txt", labels2);
+    sim.generateGnuplotScript("output/detecdown-410.txt", labels2);
 
     // auto ofs3 = std::make_shared<std::ofstream>("../output/left9-3_neighbors.txt");
     // std::vector<std::shared_ptr<BaseElement>> targets3 = {
@@ -567,7 +567,7 @@ int main()
     {
         auto normalized = oyl::normalizeto255(data);
         oyl::VideoClass video(normalized);
-        video.set_filename("../output/" + label + ".mp4");
+        video.set_filename("output/" + label + ".mp4");
         video.set_codec(cv::VideoWriter::fourcc('m', 'p', '4', 'v'));
         video.set_fps(30.0);
         video.makevideo();
